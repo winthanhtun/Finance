@@ -215,7 +215,7 @@ if not st.session_state["logged_in"]:
         u = st.text_input(text['username'])
         p = st.text_input(text['password'], type="password")
         if st.button(text['access_btn']):
-            if u == "admin" and p == "12345":
+            if u == "admin" and p =="Smart_housekeeper":
                 st.session_state["logged_in"] = True
                 st.rerun()
             else:
