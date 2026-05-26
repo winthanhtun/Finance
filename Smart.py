@@ -6,22 +6,6 @@ import os
 import uuid
 import plotly.express as px
 import streamlit.components.v1 as components
-def add_voice_mic(input_key):
-    voice_script = f"""
-    <script>
-    function startVoice_{input_key}() {{
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'my-MM';
-        recognition.start();
-        recognition.onresult = (event) => {{
-            const transcript = event.results[0][0].transcript;
-            window.parent.postMessage({{type: 'voice', text: transcript, target: '{input_key}'}}, '*');
-        }};
-    }}
-    </script>
-    <button onclick="startVoice_{input_key}()" style="cursor:pointer; background:none; border:none; font-size:20px;">🎤</button>
-    """
-    components.html(voice_script, height=40)
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance Pro", layout="wide")
 
@@ -404,7 +388,6 @@ with t1:
         with c1:
             bc = st.text_input(text['cat_name'], key="bc_input")
         with c2:
-            add_voice_mic("bc_input")
         bl = st.number_input(text['limit_amt'], min_value=0.0)
         if st.form_submit_button(text['set_budget']):
             pd.concat([b_df, pd.DataFrame([[bc, bl]], columns=b_df.columns)], ignore_index=True).to_csv(FILES['budget'],
@@ -461,8 +444,6 @@ with t3:
         with col1:
             dn = st.text_input(text['name'], key="dn_input")
         with col2:
-            add_voice_mic("dn_input")
-
         dt = st.selectbox(text['type'], [text['to_receive'], text['to_pay']])
         da = st.number_input(text['amount'])
         if st.form_submit_button(text['add_debt']):
@@ -533,8 +514,6 @@ with t7:
         with col_rc:
             rc = st.text_input(text['cat_name'], key="rc_input")
         with col_rm:
-            add_voice_mic("rc_input")
-
         ra = st.number_input(text['amount'], min_value=0.0)
         if st.form_submit_button(text['add_rec_btn_tab']):
             if rc and ra > 0:
