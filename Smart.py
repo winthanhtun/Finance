@@ -444,8 +444,8 @@ with t3:
         with col1:
             dn = st.text_input(text['name'], key="dn_input")
         with col2:
-        dt = st.selectbox(text['type'], [text['to_receive'], text['to_pay']])
-        da = st.number_input(text['amount'])
+            dt = st.selectbox(text['type'], [text['to_receive'], text['to_pay']])
+            da = st.number_input(text['amount'])
         if st.form_submit_button(text['add_debt']):
             pd.concat([d_df, pd.DataFrame([[dn, dt, da]], columns=d_df.columns)], ignore_index=True).to_csv(
                 FILES['debt'], index=False)
@@ -514,7 +514,7 @@ with t7:
         with col_rc:
             rc = st.text_input(text['cat_name'], key="rc_input")
         with col_rm:
-        ra = st.number_input(text['amount'], min_value=0.0)
+            ra = st.number_input(text['amount'], min_value=0.0)
         if st.form_submit_button(text['add_rec_btn_tab']):
             if rc and ra > 0:
                 # database ထဲမှာ error မတက်အောင် default တန်ဖိုးတွေ ထည့်ပေးထားတာပါ
