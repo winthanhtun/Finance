@@ -388,7 +388,7 @@ with t1:
         with c1:
             bc = st.text_input(text['cat_name'], key="bc_input")
         with c2:
-        bl = st.number_input(text['limit_amt'], min_value=0.0)
+            bl = st.number_input(text['limit_amt'], min_value=0.0)
         if st.form_submit_button(text['set_budget']):
             pd.concat([b_df, pd.DataFrame([[bc, bl]], columns=b_df.columns)], ignore_index=True).to_csv(FILES['budget'],
                                                                                                         index=False)
