@@ -283,9 +283,8 @@ with st.sidebar.form("main_form", clear_on_submit=True):
     with col_c:
         c_in = st.text_input(text['cat_input'], key="cat_input")
     with col_m:
-        add_voice_mic("cat_input")
-    a_in = st.number_input(text['amount'], min_value=0.0)
-    p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
+        a_in = st.number_input(text['amount'], min_value=0.0)
+        p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
     if st.form_submit_button(text['add_rec_btn']):
         if c_in and a_in > 0:
             type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
