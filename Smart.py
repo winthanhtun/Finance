@@ -5,7 +5,7 @@ from datetime import date, datetime
 import os
 import uuid
 import plotly.express as px
-import streamlit.components.v1 as components
+
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance Pro", layout="wide")
 
@@ -109,7 +109,7 @@ LANG_DICT = {
 
 # --- LANGUAGE SELECTOR PLACE AT THE TOP RIGHT ---
 # --- 1.2 MAIN TITLE (CENTERED) & LANGUAGE SELECTOR (WIDER PATTERN) ---
-# 💡 ကော်လံအချိုးအစားကို [9.2, 0.8] ဟု ပြောင်းလဲပြီး ဘောက်စ်ကို အလိုအလျောက် တိုသွားအောင် လုပ်လိုက်ပါသည်
+# 💡 language selector box ကော်လံအချိုးအစားကို [9.2, 0.8] ဟု ပြောင်းလဲပြီး ဘောက်စ်ကို အလိုအလျောက် တိုသွားအောင် လုပ်လိုက်ပါသည်
 title_col, lang_col = st.columns([9.2, 1.4])
 
 with lang_col:
@@ -120,7 +120,7 @@ with lang_col:
 with title_col:
     st.markdown(f"""
         <div style='display: grid; place-items: center; text-align: center; height: 100%; min-height: 25px;'>
-            <h1 style='margin: 0; padding: 0; color:#FFFFFF; text-align: center; font-size: 50px;'>
+            <h1 style='margin: 0; padding: 0; color:#FFFFFF; text-align: right; font-size: 50px;'>
                 {text['main_title']}
             </h1>
         </div>
@@ -133,8 +133,8 @@ st.markdown("""
     .small-lang-box div[data-baseweb="select"] {
         min-height: 30px !important;
         height: 30px !important;
-        font-size: 0.8rem !important;
-        border-radius: 6px !important;
+        font-size: 0.5rem !important;
+        border-radius: 10px !important;
     }
     .small-lang-box div[data-baseweb="select"] div {
         padding-top: 0px !important;
@@ -145,31 +145,31 @@ st.markdown("""
     .stApp, html, body, [data-testid="stAppViewContainer"] {
         background-color: #0A192F !important;
         font-family: 'Poppins', 'Pyidaungsu', sans-serif;
-        color: #E2E8F0 !important;
+        color: #FFFFFF !important;
     }
 
     /* စာသားများနှင့် ခေါင်းစဉ်အားလုံးကို အမြဲတမ်း အဖြူရောင်/လင်းရောင် ပုံသေထားခြင်း */
     h1, h2, h3, h4, h5, h6, label, p, span, .stMarkdown p {
-        color: #E2E8F0 !important;
+        color: #FFFFFF !important;
     }
 
     /* ဇယားကွက်များနှင့် Input Box များကိုပါ အမှောင်ရောင် နောက်ခံဖြင့် တစ်သားတည်းဖြစ်စေခြင်း */
     div[data-testid="stDataFrameDataframe"], 
     div[data-testid="stDataFrameDataframe"] div,
     .stDataFrame, .glideDataEditor-container, .glideDataEditor-canvas {
-        background-color: #112240 !important;
+        background-color: #0A192F !important;
         color: #FFFFFF !important;
     }
 
     div[data-baseweb="input"], div[data-baseweb="select"] {
-        background-color: #112240 !important;
+        background-color: #0A192F !important;
         border: 1px solid #233554 !important;
         color: #FFFFFF !important;
     }
 
     /* Insights Box Style */
     .ai-box {
-        background-color: #0D2040;
+        background-color: #0A192F;
         border-left: 4px solid #64FFDA; border-radius: 8px;
         padding: 15px; margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
@@ -179,40 +179,31 @@ st.markdown("""
     /* Tables, Data Editors and Containers background configurations */
     div[data-testid="element-container"] iframe,
     .stDataFrame, div[data-testid="stDataFrameDataframe"], div[data-testid="stDataFrameDataframe"] div {
-        background-color: #112240 !important;
+        background-color: #0A192F !important;
         border: none !important;
         box-shadow: none !important;
         color: #FFFFFF !important;
     }
     div[data-testid="stDataFrameDataframe"] table, div[role="grid"] {
-        background-color: #112240 !important;
+        background-color: #0A192F !important;
         color: #FFFFFF !important;
     }
     </style>
 """, unsafe_allow_html=True)
-# --- 2. LOGIN SYSTEM ---
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
 
+# --- 2. LOGIN SYSTEM ---
+if "logged_in" not in st.session_state: st.session_state["logged_in"] = False
 if not st.session_state["logged_in"]:
     st.markdown(f"<h1 style='text-align: center; font-size: 22px; color: #64FFDA;'>{text['page_title']}</h1>", unsafe_allow_html=True)
-    
-    # Form အသုံးပြုခြင်း
-    with st.form("login_form"):
+    with st.container():
         u = st.text_input(text['username'])
         p = st.text_input(text['password'], type="password")
-        
-        # Enter ခေါက်ရင် အလုပ်လုပ်မည့် submit button
-        submit_btn = st.form_submit_button(text['access_btn'])
-        
-        if submit_btn:
-            if u == "admin" and p == "Smart_housekeeper":
+        if st.button(text['access_btn']):
+            if u == "admin" and p == "12345":
                 st.session_state["logged_in"] = True
                 st.rerun()
             else:
                 st.error(text['access_denied'])
-    
-    # Login မဝင်ရသေးရင် page ရဲ့ ကျန်တဲ့အပိုင်းတွေကို မပြအောင် ဒီနေရာမှာ stop ပါ
     st.stop()
 
 # --- 3. DATABASE FILES ---
@@ -220,7 +211,7 @@ FILES = {
     'db': "database.csv", 'budget': "budget.csv", 'savings': "savings.csv",
     'debt': "debt.csv", 'rec': "recurring.csv"
 }
-if not os.path.exists("koko/receipts"): os.makedirs("koko/receipts")
+if not os.path.exists("receipts"): os.makedirs("receipts")
 
 
 def load_data(f, cols):
@@ -279,12 +270,9 @@ st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entr
 with st.sidebar.form("main_form", clear_on_submit=True):
     d_in = st.date_input(text['date'], date.today())
     t_in = st.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
-    col_c, col_m = st.columns([0.8, 0.2])
-    with col_c:
-        c_in = st.text_input(text['cat_input'], key="cat_input")
-    with col_m:
-        a_in = st.number_input(text['amount'], min_value=0.0)
-        p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
+    c_in = st.text_input(text['cat_input'])
+    a_in = st.number_input(text['amount'], min_value=0.0)
+    p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
     if st.form_submit_button(text['add_rec_btn']):
         if c_in and a_in > 0:
             type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
@@ -383,11 +371,7 @@ t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs(text['tab_titles'])
 
 with t1:
     with st.form("tab_b"):
-        c1, c2 = st.columns([0.8, 0.2])
-        with c1:
-            bc = st.text_input(text['cat_name'], key="bc_input")
-        with c2:
-            bl = st.number_input(text['limit_amt'], min_value=0.0)
+        bc, bl = st.text_input(text['cat_name']), st.number_input(text['limit_amt'], min_value=0.0)
         if st.form_submit_button(text['set_budget']):
             pd.concat([b_df, pd.DataFrame([[bc, bl]], columns=b_df.columns)], ignore_index=True).to_csv(FILES['budget'],
                                                                                                         index=False)
@@ -439,12 +423,9 @@ with t2:
 
 with t3:
     with st.form("tab_d"):
-        col1, col2 = st.columns([0.8, 0.2])
-        with col1:
-            dn = st.text_input(text['name'], key="dn_input")
-        with col2:
-            dt = st.selectbox(text['type'], [text['to_receive'], text['to_pay']])
-            da = st.number_input(text['amount'])
+        dn, dt, da = st.text_input(text['name']), st.selectbox(text['type'],
+                                                               [text['to_receive'], text['to_pay']]), st.number_input(
+            text['amount'])
         if st.form_submit_button(text['add_debt']):
             pd.concat([d_df, pd.DataFrame([[dn, dt, da]], columns=d_df.columns)], ignore_index=True).to_csv(
                 FILES['debt'], index=False)
@@ -509,11 +490,9 @@ with t6:
 
 with t7:
     with st.form("tab_r"):
-        col_rc, col_rm = st.columns([0.8, 0.2])
-        with col_rc:
-            rc = st.text_input(text['cat_name'], key="rc_input")
-        with col_rm:
-            ra = st.number_input(text['amount'], min_value=0.0)
+        rc = st.text_input(text['cat_name'])  # အကြောင်းအရာ
+        ra = st.number_input(text['amount'], min_value=0.0)  # ပမာဏ
+
         if st.form_submit_button(text['add_rec_btn_tab']):
             if rc and ra > 0:
                 # database ထဲမှာ error မတက်အောင် default တန်ဖိုးတွေ ထည့်ပေးထားတာပါ
