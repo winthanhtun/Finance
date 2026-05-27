@@ -423,37 +423,46 @@ if not data.empty:
 # 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း
     st.subheader(text['tx_records'])
     if not data.empty:
-        # data ကနေ အခြေခံဇယားကို အရင်တည်ဆောက်
         df_v = data.copy()
+        # Amount တွေကို Income/Expense အလိုက် ပြန်ခွဲထုတ်ခြင်း
         df_v["Income"] = df_v.apply(lambda x: x["Amount"] if "Income" in str(x["Type"]) else 0, axis=1)
         df_v["Expense"] = df_v.apply(lambda x: x["Amount"] if "Expense" in str(x["Type"]) else 0, axis=1)
 
         total_row = pd.DataFrame([{"Date": "TOTAL", "Type": "", "Category": "", "Income": df_v["Income"].sum(),
                                    "Expense": df_v["Expense"].sum(), "Payment Method": "", "Receipt": ""}])
         
-        # ဇယားတွင် Type ကိုပါ ထည့်သွင်းထားသည်
         final_table = pd.concat([df_v[["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Receipt"]], total_row])
 
         edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
 
         if st.button(text['save_changes']):
-            # ၁။ ဇယားကို သန့်စင်ခြင်း (TOTAL ကိုဖျက်၊ Amount ပြန်တွက်)
+            # ၁။ ဇယားကို သန့်စင်ခြင်း
             clean_df = edited[edited["Date"] != "TOTAL"].copy()
+            # အကယ်၍ Amount ကို Income + Expense ဆိုပြီး ပြန်ပေါင်းရင် Type လေးကို သေချာစစ်ဖို့လိုတယ်
             clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
-            # ဇယားသိမ်းရန်အတွက် မလိုတဲ့ Column များကို ဖယ်ထုတ်ခြင်း
+            
+            # Type Column ကို ပြန်သတ်မှတ်ပေးမယ် (Income/Expense ခွဲထားတာတွေကို ပြန်စုမယ်)
+            clean_df["Type"] = clean_df.apply(lambda x: "Income (ဝင်ငွေ)" if x["Income"] > 0 else "Expense (ထွက်ငွေ)", axis=1)
+            
             final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"]]
             final_save.to_csv(FILES['db'], index=False)
             
-            # ၂။ Savings ဇယားကို ပြန်တွက်ခြင်း
+            # ၂။ Savings ဇယားကို ပြန်တွက်ခြင်း (အဓိက အပိုင်း)
             if os.path.exists(FILES['savings']):
                 s_df = pd.read_csv(FILES['savings'])
                 s_df['Saved'] = 0 
+                
                 for index, row in s_df.iterrows():
                     goal = row['Goal']
-                    # Transaction ဇယားအသစ်ထဲက Category နဲ့ Goal တူတာကို ပေါင်းမယ်
-                    total = final_save[(final_save["Type"].str.contains("Expense", na=False)) & 
-                                       (final_save['Category'] == goal)]['Amount'].sum()
+                    # ဒီနေရာမှာ 'Expense (ထွက်ငွေ)' ဆိုတဲ့ စာသားအတိုင်းပဲလား စစ်ပေးပါ
+                    # ဒါမှမဟုတ် Type ထဲက "Expense" ဆိုတဲ့ စာလုံးပါတာနဲ့တင် တွက်ပေးမယ်
+                    total = final_save[
+                        (final_save["Type"].str.contains("Expense", case=False, na=False)) & 
+                        (final_save['Category'] == goal)
+                    ]['Amount'].sum()
+                    
                     s_df.at[index, 'Saved'] = total
+                
                 s_df.to_csv(FILES['savings'], index=False)
             
             st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
