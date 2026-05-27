@@ -298,29 +298,31 @@ a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 
 # 2. Submit Button
-# 2. Submit Button အပိုင်း
 if st.sidebar.button(text['add_rec_btn']):
     if c_in and a_in > 0:
         type_clean = "Income (ဝင်ငွေ)" if t_in == text['inc_opt'] else "Expense (ထွက်ငွေ)"
         
-        # ၁။ CSV ထဲက Column အမည်အတိုင်း သေချာသတ်မှတ်ပါ
-        # ကိုကို့ CSV ထဲမှာ 'Payment Method' လို့ ရေးထားရင် 'Payment Method': [p_in] လို့ ပြင်ပေးပါ
+        # ၁။ CSV ထဲကို အချက်အလက်သစ်သွင်းမယ်
         new_row = pd.DataFrame({
-            'Date': [d_in],
-            'Type': [type_clean],
-            'Category': [c_in],
-            'Amount': [a_in],
-            'Payment Method': [p_in], # CSV ထဲကအတိုင်းပဲ ရေးပါ
+            'Date': [d_in], 
+            'Type': [type_clean], 
+            'Category': [c_in], 
+            'Amount': [a_in], 
+            'Payment Method': [p_in], 
             'Receipt': [""]
         })
+        # (သတိထားရန် - ကိုကို့ CSV ထဲက Header နာမည်တွေနဲ့ ဒီ key တွေ တူရပါမယ်)
         
-        # ၂။ Columns နာမည်တွေကို အတင်းညှိပေးတဲ့ Step
-        # အရင်ရှိတဲ့ data (CSV) ရဲ့ column အမည်တွေနဲ့ အခုအသစ်က column အမည်တွေကို ပေါင်းဖို့အတွက်
-        updated_df = pd.concat([data, new_row], ignore_index=True)
+        data = pd.concat([data, new_row], ignore_index=True)
+        data.to_csv(FILES['db'], index=False)
         
-        # ၃။ သိမ်းတဲ့အခါ Column အမည်အမှန်နဲ့ ပြန်သိမ်းပါ
-        updated_df.to_csv(FILES['db'], index=False)
-        
+        # ၂။ အခုအသစ်ထည့်လိုက်တာက Savings Goal နဲ့ တူရင် 'Saved' ထဲကို အလိုအလျောက် ပေါင်းထည့်မယ်
+        if c_in in s_df['Goal'].values:
+            # Savings ဇယားထဲက အဲ့ဒီ Goal ရဲ့ Saved တန်ဖိုးကို ရှာပြီး ပေါင်းမယ်
+            s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
+            # ပြင်ပြီးသား Savings ဇယားကို သိမ်းမယ်
+            s_df.to_csv(FILES['savings'], index=False)
+            
         st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
         st.rerun()
 
