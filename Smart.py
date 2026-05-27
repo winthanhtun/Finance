@@ -314,7 +314,24 @@ for _, r in b_df.iterrows():
     
     # ရာခိုင်နှုန်းတွက်ပြီး Progress Bar ပြခြင်း
     progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
-    st.sidebar.progress(progress_pct)
+    # တွက်ချက်ခြင်း
+    progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
+    
+    # ရာခိုင်နှုန်းပေါ်မူတည်ပြီး အရောင်သတ်မှတ်ခြင်း
+    if progress_pct < 0.5:
+        bar_color = "#2ECC71"  # အစိမ်း (၅၀% အောက်)
+    elif progress_pct < 0.75:
+        bar_color = "#F1C40F"  # အဝါ (၅၀% - ၇၅%)
+    else:
+        bar_color = "#E74C3C"  # အနီ (၇၅% အထက်)
+
+    # HTML/CSS သုံးပြီး Progress Bar ဖန်တီးခြင်း
+    st.sidebar.markdown(f"""
+        <div style="background-color: #233554; border-radius: 5px; height: 10px; width: 100%;">
+            <div style="background-color: {bar_color}; height: 10px; width: {progress_pct * 100}%; border-radius: 5px;"></div>
+        </div>
+    """, unsafe_allow_html=True)
+    st.sidebar.write("") # အောက်ကဟာနဲ့ ကပ်မသွားအောင် နေရာချန်ပေးခြင်း
     
     # ဘတ်ဂျက်ကျော်ရင် သတိပေးချက်
     if used > limit_val:
