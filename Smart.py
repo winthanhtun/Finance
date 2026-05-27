@@ -280,17 +280,16 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 📝 New Entry ခေါင်းစဉ်ကို ပြက္ခဒိန်အောက်သို့ ပို့ခြင်း
+# 📝 New Entry (Form မသုံးဘဲ)
 st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entry']}</h2>", unsafe_allow_html=True)
 
-# 1. Inputs (Form မသုံးတော့ပါ)
+# 1. Inputs
 d_in = st.sidebar.date_input(text['date'], date.today())
 t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 
-# Category ရွေးရန်
 budget_categories = b_df['Category'].tolist() + ["အခြား"] 
 c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
 
-# အခြား ရွေးလျှင် ပေါ်လာမည့် Input
 c_in = c_select
 if c_select == "အခြား":
     c_in = st.sidebar.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ")
@@ -298,17 +297,30 @@ if c_select == "အခြား":
 a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 
-# 2. Submit Button (Form အပြင်မှာ)
+# 2. Submit Button
 if st.sidebar.button(text['add_rec_btn']):
-    # ဒီနေရာမှာ စစ်ဆေးမယ်
     if c_in and a_in > 0:
-        type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
-        new_row = pd.DataFrame([[d_in, type_clean, c_in, a_in, p_in, ""]], columns=data.columns)
+        # ဒီနေရာမှာ type_clean ကို သေချာ assign လုပ်တယ်
+        type_clean = "Income (ဝင်ငွေ)" if t_in == text['inc_opt'] else "Expense (ထွက်ငွေ)"
+        
+        # DataFrame ကို တည်ဆောက်တဲ့အခါ Column အစီအစဉ်ကို သေချာကြည့်ပါ
+        # ကိုကို့ data.columns က ['Date', 'Type', 'Category', 'Amount', 'Method', 'Note'] ဆိုရင် ဒီအတိုင်းထားပါ
+        new_data = {
+            'Date': [d_in],
+            'Type': [type_clean],
+            'Category': [c_in],
+            'Amount': [a_in],
+            'Method': [p_in],
+            'Note': [""] # Note က အလွတ်
+        }
+        new_row = pd.DataFrame(new_data)
         
         # Save လုပ်မယ်
-        pd.concat([data, new_row], ignore_index=True).to_csv(FILES['db'], index=False)
-        st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
-        st.rerun() # Page ကို Refresh လုပ်ပေးမယ်
+        updated_df = pd.concat([data, new_row], ignore_index=True)
+        updated_df.to_csv(FILES['db'], index=False)
+        
+        st.success("ထည့်သွင်းပြီးပါပြီ!")
+        st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(text['budget_prog'])
