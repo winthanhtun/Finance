@@ -472,7 +472,8 @@ with t2:
     st.markdown("---")
     for _, r in edited_s.iterrows():
         st.write(f"**{r['Goal']}**")
-        st.progress(min(r['Saved'] / r['Target'], 1.0) if r['Target'] > 0 else 0)
+        progress_val = float(r['Saved']) / float(r['Target']) if r['Target'] > 0 else 0
+        st.progress(min(max(progress_val, 0.0), 1.0))
 
     # 3. AI Analysis (အရင်ကအတိုင်းပဲ)
     if not s_df.empty:
