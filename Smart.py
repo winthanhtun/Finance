@@ -476,15 +476,16 @@ with t1:
     render_ai_box(text['analysis_title'], ai_b_en, ai_b_mm)
 
 with t2:
-    st.subheader(text['tab_titles'][1]) # "🎯 စုငွေ"
-
-    # 2. အရင်ကအတိုင်းပဲ တခြား Goal တွေ ထည့်လို့ရအောင် ပြန်ထည့်ပေးထားတယ်
+    st.subheader(text['tab_titles'][1]) 
+    
+    # 1. Goal အသစ်ထည့်ရန် Form (အရင်အတိုင်း)
     with st.form("tab_s"):
         sg, stg, sc = st.text_input(text['goal']), st.number_input(text['target']), st.number_input(text['current'])
         if st.form_submit_button(text['save_goal']):
             pd.concat([s_df, pd.DataFrame([[sg, stg, sc]], columns=s_df.columns)], ignore_index=True).to_csv(FILES['savings'], index=False)
             st.rerun()
             
+    # 2. Savings ဇယားကို Editor နဲ့ ပြမယ်
     edited_s = st.data_editor(s_df, use_container_width=True, num_rows="dynamic", key="editor_s")
     if st.button(text['save_changes'], key="btn_save_s"):
         edited_s.to_csv(FILES['savings'], index=False)
@@ -492,10 +493,26 @@ with t2:
         st.rerun()
 
     st.markdown("---")
+    
+    # 3. ဤနေရာမှာ New Entry နဲ့ ချိတ်ဆက်ပေးမယ့် Logic
     for _, r in edited_s.iterrows():
-        st.write(f"**{r['Goal']}**")
-        progress_val = float(r['Saved']) / float(r['Target']) if r['Target'] > 0 else 0
+        goal_name = r['Goal']
+        target_val = r['Target']
+        
+        # New Entry ထဲက ဒီ Category နဲ့ ဆိုင်တဲ့ Amount အားလုံးကို data ထဲကနေ ပြန်ပေါင်းမယ်
+        # Type က Expense ဖြစ်ပြီး Category က ဒီ goal_name နဲ့ တူတာကို ရှာမယ်
+        total_saved_from_entry = data[(data['Type'] == "Expense (ထွက်ငွေ)") & 
+                                     (data['Category'] == goal_name)]['Amount'].sum()
+        
+        # ဇယားထဲမှာ ရိုက်ထည့်ထားတဲ့ လက်ရှိစုငွေ (sc) နဲ့ ပေါင်းပေးမယ်
+        total_current = r['Saved'] + total_saved_from_entry
+        
+        st.write(f"### {goal_name}")
+        st.write(f"စုဆောင်းပြီးပမာဏ: {total_current:,.0f} K / {target_val:,.0f} K")
+        
+        progress_val = float(total_current) / float(target_val) if target_val > 0 else 0
         st.progress(min(max(progress_val, 0.0), 1.0))
+        st.markdown("---")
 
     # 3. AI Analysis (အရင်ကအတိုင်းပဲ)
     if not s_df.empty:
