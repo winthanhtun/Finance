@@ -300,10 +300,25 @@ with st.sidebar.form("main_form", clear_on_submit=True):
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(text['budget_prog'])
+
+# အသုံးစရိတ် Data ထဲမှာ "Expense (ထွက်ငွေ)" ဆိုတဲ့ စာသား အတိအကျပါမှ တွက်အောင်လုပ်ပါ
 for _, r in b_df.iterrows():
-    used = data[(data["Type"].str.contains("Expense")) & (data["Category"] == r['Category'])]["Amount"].sum()
-    st.sidebar.caption(f"{r['Category']}: {used:,.0f}/{r['Limit']:,.0f}")
-    st.sidebar.progress(min(used / r['Limit'], 1.0) if r['Limit'] > 0 else 0)
+    category_name = r['Category']
+    limit_val = r['Limit']
+    
+    # တွက်ချက်မှု: စာရင်းထဲမှာ Expense (ထွက်ငွေ) အမျိုးအစားထဲက သက်ဆိုင်ရာ Category ကို ရှာပြီး ပေါင်းမယ်
+    used = data[(data["Type"] == "Expense (ထွက်ငွေ)") & (data["Category"] == category_name)]["Amount"].sum()
+    
+    # Progress Bar နဲ့ အချက်အလက် ပြသခြင်း
+    st.sidebar.write(f"**{category_name}**: {used:,.0f} / {limit_val:,.0f}")
+    
+    # ရာခိုင်နှုန်းတွက်ပြီး Progress Bar ပြခြင်း
+    progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
+    st.sidebar.progress(progress_pct)
+    
+    # ဘတ်ဂျက်ကျော်ရင် သတိပေးချက်
+    if used > limit_val:
+        st.sidebar.error("⚠️ ဘတ်ဂျက်ကျော်လွန်နေပါပြီ")
 
 # 🎨 USER CUSTOM COLORS SETUP FOR PIE CHARTS (SIDEBAR BOTTOM)
 st.sidebar.markdown("---")
