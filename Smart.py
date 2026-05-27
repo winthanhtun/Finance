@@ -422,24 +422,33 @@ if not data.empty:
             render_ai_box(text['analysis_title'], ai_exp_en, ai_exp_mm)
 
 # --- 6. EXCEL STYLE TABLE ---
-st.subheader(text['tx_records'])
-if not data.empty:
-    df_v = data.copy()
-    df_v["Income"] = df_v.apply(lambda x: x["Amount"] if "Income" in str(x["Type"]) else 0, axis=1)
-    df_v["Expense"] = df_v.apply(lambda x: x["Amount"] if "Expense" in str(x["Type"]) else 0, axis=1)
-
-    total_row = pd.DataFrame([{"Date": "TOTAL", "Type": "", "Category": "", "Income": df_v["Income"].sum(),
-                               "Expense": df_v["Expense"].sum(), "Payment Method": "", "Receipt": ""}],
-                             index=[len(df_v)])
-    final_table = pd.concat(
-        [df_v[["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Receipt"]], total_row])
-
-    edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
     if st.button(text['save_changes']):
+        # ၁။ ဇယားကို အရင်သန့်စင်မယ်
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
-        clean_df.drop(columns=["Income", "Expense"]).to_csv(FILES['db'], index=False)
-        st.success(text['db_updated'])
+        # Type ကို ပြန်ဖော်ပြဖို့ လိုရင် ဒီမှာ ထပ်ထည့်ပေးရမယ်
+        # (အခု Code မှာ Type လေး ပျောက်နေနိုင်တယ်၊ လိုရင် Type ကိုပါ ထည့်ပေးပါ)
+        clean_df = clean_df.drop(columns=["Income", "Expense"])
+        
+        # CSV ထဲကို သိမ်းမယ်
+        clean_df.to_csv(FILES['db'], index=False)
+        
+        # ၂။ Savings (စုဆောင်းငွေ) ဇယားကိုပါ အလိုအလျောက် ပြန်တွက်မယ်
+        s_df = pd.read_csv(FILES['savings'])
+        # clean_df က ခုနက edit လုပ်ပြီးသား Data အသစ်
+        s_df['Saved'] = 0 
+        for index, row in s_df.iterrows():
+            goal = row['Goal']
+            # Transaction ဇယားအသစ်ထဲကနေ ဒီ Goal နဲ့တူတာကို ပေါင်းမယ်
+            # Category က 'Expense (ထွက်ငွေ)' ဖြစ်ရမယ်
+            total_from_data = clean_df[(clean_df["Type"].str.contains("Expense", na=False)) & 
+                                       (clean_df['Category'] == goal)]['Amount'].sum()
+            s_df.at[index, 'Saved'] = total_from_data
+        
+        # ၃။ Savings ဇယားအသစ်ကို သိမ်းမယ်
+        s_df.to_csv(FILES['savings'], index=False)
+        
+        st.success(text['db_updated'] + " နှင့် Savings များကို အသစ်ပြန်တွက်ပြီးပါပြီ!")
         st.rerun()
 
 # --- 7. TABS 9 ခု ---
