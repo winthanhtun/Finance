@@ -455,18 +455,6 @@ with t1:
 
 with t2:
     st.subheader(text['tab_titles'][1]) # "🎯 စုငွေ"
-    
-    # 1. Long-term Goal (အိမ်ပြင်ရန် - အလိုအလျောက်တွက်ပေးမယ့်နေရာ)
-    st.markdown("### 🏠 Long-term Goal: အိမ်ပြင်ရန်")
-    long_term_goal = 10000000 # သိန်း ၁၀၀
-    # data ထဲက "စုငွေ" Category အားလုံးကို ပေါင်းမယ်
-    total_accumulated = data[data["Category"] == "စုငွေ"]["Amount"].sum()
-    progress_val = min(total_accumulated / long_term_goal, 1.0)
-    
-    st.metric("စုစုပေါင်း လက်ရှိစုဆောင်းထားရှိငွေ", f"{total_accumulated:,.0f} K")
-    st.progress(progress_val)
-    st.write(f"ပန်းတိုင်သို့ ရောက်ရှိမှု: {progress_val*100:.1f}% / သိန်း ၁၀၀")
-    st.markdown("---")
 
     # 2. အရင်ကအတိုင်းပဲ တခြား Goal တွေ ထည့်လို့ရအောင် ပြန်ထည့်ပေးထားတယ်
     with st.form("tab_s"):
