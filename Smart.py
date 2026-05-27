@@ -421,23 +421,32 @@ t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs(text['tab_titles'])
 
 with t1:
     with st.form("tab_b"):
-        bc, bl = st.text_input(text['cat_name']), st.number_input(text['limit_amt'], min_value=0.0)
+        bc = st.text_input(text['cat_name'])
+        bl = st.number_input(text['limit_amt'], min_value=0.0)
+        
         if st.form_submit_button(text['set_budget']):
-            pd.concat([b_df, pd.DataFrame([[bc, bl]], columns=b_df.columns)], ignore_index=True).to_csv(FILES['budget'],
-                                                                                                        index=False)
-            st.rerun()
+            # ဘတ်ဂျက်အသစ် ထည့်သွင်းခြင်း
+            new_budget = pd.DataFrame([[bc, bl]], columns=b_df.columns)
+            pd.concat([b_df, new_budget], ignore_index=True).to_csv(FILES['budget'], index=False)
+            st.success("ဘတ်ဂျက်အသစ် ထည့်သွင်းပြီးပါပြီ!")
+            st.rerun() # အဆင့် (၃) - Page ကို Refresh လုပ်ပေးခြင်း
+
+    # ဘတ်ဂျက်ဇယား ပြင်ဆင်ခြင်း
     edited_b = st.data_editor(b_df, use_container_width=True, num_rows="dynamic", key="editor_b")
+    
     if st.button(text['save_changes'], key="btn_save_b"):
         edited_b.to_csv(FILES['budget'], index=False)
         st.success(text['db_updated'])
-        st.rerun()
+        st.rerun() # အဆင့် (၃) - ပြင်ဆင်ပြီးတာနဲ့ Page ကို Refresh လုပ်ပေးခြင်း
 
+    # AI Analysis အပိုင်း
     if not b_df.empty:
         ai_b_en = "**Analysis:**\n* Sub-budgets have been initialized and loaded inside active storage.\n* Real-time monitoring vectors are fully functional across the configured parameters.\n\n**Recommendations:**\n* Ensure the total combined budget threshold never breaches 70% of total expected incoming revenue.\n* Adjust allocation weights monthly based on the real expenditure feedback loop."
         ai_b_mm = "**သုံးသပ်ချက်:**\n* ကဏ္ဍအလိုက် ဘတ်ဂျက်ကန့်သတ်ချက်များကို လက်ရှိစနစ်ထဲတွင် အောင်မြင်စွာ ထည့်သွင်းထားပြီး ဖြစ်ပါသည်။\n* သတ်မှတ်ထားသော ဘောင်များအတွင်း ကုန်ကျစရိတ်များကို အချိန်နဲ့တပြေးညီ ကောင်းမွန်စွာ စောင့်ကြည့်နိုင်ပြီ ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* ဘတ်ဂျက်စုစုပေါင်း ပမာဏသည် ခန့်မှန်းလစဉ်ဝင်ငွေ၏ ၇၀% ထက် မကျော်လွန်စေရန် ဂရုပြုပါ။\n* လက်တွေ့သုံးစွဲမှု မှတ်တမ်းများအပေါ် အခြေခံ၍ လစဉ် ဘတ်ဂျက်ပမာဏများကို လိုအပ်သလို အနည်းငယ် ညှိနှိုင်းပြင်ဆင်ပါ။"
     else:
         ai_b_en = "**Analysis:**\n* The budget matrix is currently empty with zero protective thresholds found.\n* Financial parameters are currently exposed to sudden impulsive spending vectors.\n\n**Recommendations:**\n* Set definite ceilings for your top three historical operational costs immediately.\n* Review past expenditure layers to find the optimal baseline numbers for each key category."
         ai_b_mm = "**သုံးသပ်ချက်:**\n* စနစ်ထဲတွင် ဘတ်ဂျက်သတ်မှတ်ချက်များ မရှိသေးဘဲ အကာအကွယ်မဲ့သော အခြေအနေ ဖြစ်နေပါသည်။\n* မမျှော်လင့်ဘဲ စိတ်အလိုလိုက် သုံးစွဲမိမည့် အန္တရာယ်နှင့် Ngweကြေးယိုစိမ့်မှုများ ဖြစ်ပေါ်နိုင်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* အသုံးစရိတ် အများဆုံးဖြစ်လေ့ရှိသည့် အဓိက ကဏ္ဍ ၃ ခုအတွက် ကန့်သတ်ချက်များကို ချက်ချင်း သတ်မှတ်ပါ။\n* သင့်တင့်မျှတသော ဘတ်ဂျက်ပမာဏများ ရရှိစေရန် ယခင်လများက ကုန်ကျစရိတ်များကို ပြန်လည် ဆန်းစစ်ပါ။"
+    
     render_ai_box(text['analysis_title'], ai_b_en, ai_b_mm)
 
 with t2:
