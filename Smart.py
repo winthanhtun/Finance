@@ -298,26 +298,27 @@ a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 
 # 2. Submit Button
+# 2. Submit Button အပိုင်း
 if st.sidebar.button(text['add_rec_btn']):
     if c_in and a_in > 0:
         type_clean = "Income (ဝင်ငွေ)" if t_in == text['inc_opt'] else "Expense (ထွက်ငွေ)"
         
-        # ဒီနေရာကို အတိအကျ ပြင်ပါ
-        # Column နာမည်တွေကို ကိုကို့ CSV ထဲမှာရှိတဲ့အတိုင်း အမှန်အတိုင်း ထည့်ပါ
+        # ၁။ CSV ထဲက Column အမည်အတိုင်း သေချာသတ်မှတ်ပါ
+        # ကိုကို့ CSV ထဲမှာ 'Payment Method' လို့ ရေးထားရင် 'Payment Method': [p_in] လို့ ပြင်ပေးပါ
         new_row = pd.DataFrame({
             'Date': [d_in],
             'Type': [type_clean],
             'Category': [c_in],
             'Amount': [a_in],
-            'Method': [p_in],  # ဒီနေရာက ကိုကို့ CSV ထဲက Column ခေါင်းစဉ်နဲ့ တစ်လုံးမှ မမှားရပါဘူး
-            'Note': [""]
+            'Payment Method': [p_in], # CSV ထဲကအတိုင်းပဲ ရေးပါ
+            'Receipt': [""]
         })
         
-        # data က လက်ရှိရှိနေတဲ့ DataFrame ပါ
-        # data နဲ့ new_row ကို ပေါင်းတဲ့အခါ Columns တွေကို အတင်းသတ်မှတ်ပေးပါ
+        # ၂။ Columns နာမည်တွေကို အတင်းညှိပေးတဲ့ Step
+        # အရင်ရှိတဲ့ data (CSV) ရဲ့ column အမည်တွေနဲ့ အခုအသစ်က column အမည်တွေကို ပေါင်းဖို့အတွက်
         updated_df = pd.concat([data, new_row], ignore_index=True)
         
-        # သိမ်းလိုက်ပါ
+        # ၃။ သိမ်းတဲ့အခါ Column အမည်အမှန်နဲ့ ပြန်သိမ်းပါ
         updated_df.to_csv(FILES['db'], index=False)
         
         st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
