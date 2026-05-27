@@ -36,8 +36,7 @@ LANG_DICT = {
         "tx_records": "📑 Transaction Records",
         "save_changes": "Save Table Changes",
         "db_updated": "Database Updated!",
-        "tab_titles": ["💰 Budget", "🎯 Savings", "💸 Debt", "📊 Compare", "💳 Payment", "🧾 Receipt", "🔁 Recurring",
-                       "📁 Archive"],
+        "tab_titles": ["💰 Budget", "🎯 Savings", "💸 Debt", "📊 Compare", "💳 Payment", "🧾 Receipt", "📅 Calendar", "🧮 Calculator", "📁 Archive"],
         "cat_name": "Budget Name",
         "limit_amt": "Limit Amount",
         "set_budget": "Set Budget",
@@ -86,8 +85,7 @@ LANG_DICT = {
         "tx_records": "📑 ငွေ ပေးချေ/လက်ခံ မှုမှတ်တမ်းများ",
         "save_changes": " ပြင်ဆင်ချက် သိမ်းဆည်းမည်",
         "db_updated": " အချက်အလက်များအောင်မြင်စွာ ပြုပြင်သိမ်းဆည်း ပြီးပါပြီ!",
-        "tab_titles": ["💰 ဘတ်ဂျက်", "🎯 စုငွေ", "💸 အကြွေး", "📊 နှိုင်းယှဉ်ချက်", "💳 ငွေပေးချေမှု", "🧾 ပြေစာ",
-                       "🔁 ပုံမှန်အသုံးစရိတ်", "📁 သိမ်းဆည်းရန်"],
+        "tab_titles": ["💰 ဘတ်ဂျက်", "🎯 စုငွေ", "💸 အကြွေး", "📊 နှိုင်းယှဉ်ချက်", "💳 ငွေပေးချေမှု", "🧾 ပြေစာ", "📅 ငွေကြေးပြက္ခဒိန်", "🧮 စုငွေတွက်ချက်စက်", "📁 သိမ်းဆည်းရန်"],
         "cat_name": "ဘတ်ဂျက် အမည်",
         "limit_amt": "အသုံးပြုမည့် ငွေပမာဏ",
         "set_budget": "ငွေပမာဏ သတ်မှတ်မည်",
@@ -423,6 +421,7 @@ if not data.empty:
 
 # --- 7. TABS 9 ခု ---
 st.markdown("---")
+# အရင်က ၈ ခုနေရာမှာ အခု ၉ ခုဖြစ်သွားပါပြီ
 t1, t2, t3, t4, t5, t6, t7, t8, t9 = st.tabs(text['tab_titles'])
 
 with t1:
