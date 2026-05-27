@@ -522,22 +522,20 @@ with t2:
 
     st.markdown("---")
     
-    # 3. ဤနေရာမှာ New Entry နဲ့ ချိတ်ဆက်ပေးမယ့် Logic
+    # 3. ဤနေရာမှာ New Entry နဲ့ ချိတ်ဆက်ပေးမည့် Logic (ဒီအပိုင်းကို အစားထိုးပါ)
     for _, r in edited_s.iterrows():
         goal_name = r['Goal']
         target_val = r['Target']
         
-        # New Entry ထဲက ဒီ Category နဲ့ ဆိုင်တဲ့ Amount အားလုံးကို data ထဲကနေ ပြန်ပေါင်းမယ်
-        # Type က Expense ဖြစ်ပြီး Category က ဒီ goal_name နဲ့ တူတာကို ရှာမယ်
-        total_saved_from_entry = data[(data['Type'] == "Expense (ထွက်ငွေ)") & 
-                                     (data['Category'] == goal_name)]['Amount'].sum()
-        
-        # ဇယားထဲမှာ ရိုက်ထည့်ထားတဲ့ လက်ရှိစုငွေ (sc) နဲ့ ပေါင်းပေးမယ်
-        total_current = r['Saved'] + total_saved_from_entry
+        # [အရေးကြီး] ဒီမှာ r['Saved'] ကို မသုံးတော့ဘဲ 'data' ထဲက Expense တွေကိုပဲ ပေါင်းမယ်
+        # ဒါမှ 2 ဆ ဖြစ်မနေမှာပါ
+        total_current = data[(data['Type'] == "Expense (ထွက်ငွေ)") & 
+                             (data['Category'] == goal_name)]['Amount'].sum()
         
         st.write(f"### {goal_name}")
         st.write(f"စုဆောင်းပြီးပမာဏ: {total_current:,.0f} K / {target_val:,.0f} K")
         
+        # Progress Bar အတွက်
         progress_val = float(total_current) / float(target_val) if target_val > 0 else 0
         st.progress(min(max(progress_val, 0.0), 1.0))
         st.markdown("---")
