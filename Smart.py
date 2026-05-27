@@ -53,7 +53,7 @@ LANG_DICT = {
         "upload_receipt": "Upload Receipt Image",
         "add_rec_btn_tab": "Add Recurring",
         "export_csv": "📥 Export CSV",
-        "analysis_title": "💡 Insights & Recommendations"
+        "analysis_title": "💡 Insights & Recommendations",
         "calendar_tab": "📅 Financial Calendar",
         "calc_tab": "🧮 Savings Calculator",
         "cal_title": "Monthly Financial Calendar",
