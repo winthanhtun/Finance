@@ -300,26 +300,27 @@ p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 # 2. Submit Button
 if st.sidebar.button(text['add_rec_btn']):
     if c_in and a_in > 0:
-        # ဒီနေရာမှာ type_clean ကို သေချာ assign လုပ်တယ်
         type_clean = "Income (ဝင်ငွေ)" if t_in == text['inc_opt'] else "Expense (ထွက်ငွေ)"
         
-        # DataFrame ကို တည်ဆောက်တဲ့အခါ Column အစီအစဉ်ကို သေချာကြည့်ပါ
-        # ကိုကို့ data.columns က ['Date', 'Type', 'Category', 'Amount', 'Method', 'Note'] ဆိုရင် ဒီအတိုင်းထားပါ
-        new_data = {
+        # ဒီနေရာကို အတိအကျ ပြင်ပါ
+        # Column နာမည်တွေကို ကိုကို့ CSV ထဲမှာရှိတဲ့အတိုင်း အမှန်အတိုင်း ထည့်ပါ
+        new_row = pd.DataFrame({
             'Date': [d_in],
             'Type': [type_clean],
             'Category': [c_in],
             'Amount': [a_in],
-            'Method': [p_in],
-            'Note': [""] # Note က အလွတ်
-        }
-        new_row = pd.DataFrame(new_data)
+            'Method': [p_in],  # ဒီနေရာက ကိုကို့ CSV ထဲက Column ခေါင်းစဉ်နဲ့ တစ်လုံးမှ မမှားရပါဘူး
+            'Note': [""]
+        })
         
-        # Save လုပ်မယ်
+        # data က လက်ရှိရှိနေတဲ့ DataFrame ပါ
+        # data နဲ့ new_row ကို ပေါင်းတဲ့အခါ Columns တွေကို အတင်းသတ်မှတ်ပေးပါ
         updated_df = pd.concat([data, new_row], ignore_index=True)
+        
+        # သိမ်းလိုက်ပါ
         updated_df.to_csv(FILES['db'], index=False)
         
-        st.success("ထည့်သွင်းပြီးပါပြီ!")
+        st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
         st.rerun()
 
 st.sidebar.markdown("---")
