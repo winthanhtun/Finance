@@ -304,7 +304,6 @@ with st.sidebar.form("main_form", clear_on_submit=True):
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(text['budget_prog'])
-
 # အသုံးစရိတ် Data ထဲမှာ "Expense (ထွက်ငွေ)" ဆိုတဲ့ စာသား အတိအကျပါမှ တွက်အောင်လုပ်ပါ
 for _, r in b_df.iterrows():
     category_name = r['Category']
@@ -455,12 +454,27 @@ with t1:
     render_ai_box(text['analysis_title'], ai_b_en, ai_b_mm)
 
 with t2:
+    st.subheader(text['tab_titles'][1]) # "🎯 စုငွေ"
+    
+    # 1. Long-term Goal (အိမ်ပြင်ရန် - အလိုအလျောက်တွက်ပေးမယ့်နေရာ)
+    st.markdown("### 🏠 Long-term Goal: အိမ်ပြင်ရန်")
+    long_term_goal = 10000000 # သိန်း ၁၀၀
+    # data ထဲက "စုငွေ" Category အားလုံးကို ပေါင်းမယ်
+    total_accumulated = data[data["Category"] == "စုငွေ"]["Amount"].sum()
+    progress_val = min(total_accumulated / long_term_goal, 1.0)
+    
+    st.metric("စုစုပေါင်း လက်ရှိစုဆောင်းထားရှိငွေ", f"{total_accumulated:,.0f} K")
+    st.progress(progress_val)
+    st.write(f"ပန်းတိုင်သို့ ရောက်ရှိမှု: {progress_val*100:.1f}% / သိန်း ၁၀၀")
+    st.markdown("---")
+
+    # 2. အရင်ကအတိုင်းပဲ တခြား Goal တွေ ထည့်လို့ရအောင် ပြန်ထည့်ပေးထားတယ်
     with st.form("tab_s"):
         sg, stg, sc = st.text_input(text['goal']), st.number_input(text['target']), st.number_input(text['current'])
         if st.form_submit_button(text['save_goal']):
-            pd.concat([s_df, pd.DataFrame([[sg, stg, sc]], columns=s_df.columns)], ignore_index=True).to_csv(
-                FILES['savings'], index=False)
+            pd.concat([s_df, pd.DataFrame([[sg, stg, sc]], columns=s_df.columns)], ignore_index=True).to_csv(FILES['savings'], index=False)
             st.rerun()
+            
     edited_s = st.data_editor(s_df, use_container_width=True, num_rows="dynamic", key="editor_s")
     if st.button(text['save_changes'], key="btn_save_s"):
         edited_s.to_csv(FILES['savings'], index=False)
@@ -472,17 +486,19 @@ with t2:
         st.write(f"**{r['Goal']}**")
         st.progress(min(r['Saved'] / r['Target'], 1.0) if r['Target'] > 0 else 0)
 
+    # 3. AI Analysis (အရင်ကအတိုင်းပဲ)
     if not s_df.empty:
         low_savings = s_df[s_df["Saved"] / s_df["Target"] < 0.3]
         if not low_savings.empty:
-            ai_s_en = f"**Analysis:**\n* Savings blueprints are correctly structured inside the active framework.\n* Critical velocity lag observed: **'{low_savings.iloc[0]['Goal']}'** is scaling slowly under the 30% metric line.\n\n**Recommendations:**\n* Set up automatic compounding transfers directly linked to your primary inflow schedule.\n* Channel windfalls, bonuses, or residual profit deltas instantly into lagging savings pools."
-            ai_s_mm = f"**သုံးသပ်ချက်:**\n* စုဆောင်းငွေ ရည်မှန်းချက်များအား စနစ်တကျ ထည့်သွင်း တည်ဆောက်ထားပြီး ဖြစ်ပါသည်။\n* တိုးတက်မှု နှေးကွေးခြင်း သတိပြုမိသည်- **'{low_savings.iloc[0]['Goal']}'** သည် သတ်မှတ်ချက်၏ ၃၀% အောက်တွင်သာ ရှိနေသေးပါသည်။\n\n**အကြံပြုချက်များ:**\n* ဝင်ငွေရရှိသည့်နေ့တိုင်းတွင် စုငွေအကောင့်ထဲသို့ အလိုအလျောက် ပေးပို့မည့်စနစ်ကို အသုံးပြုပါ။\n* မမျှော်လင့်ဘဲ ရရှိလာသော အပိုဝင်ငွေများ သို့မဟုတ် ဘောနပ်စ်များကို နှေးကွေးနေသော စုငွေပန်းတိုင်များထဲသို့ ချက်ချင်း ထည့်သွင်းပါ။"
+            ai_s_en = f"**Analysis:**\n* Savings blueprints are correctly structured...\n* Critical velocity lag observed: **'{low_savings.iloc[0]['Goal']}'** is scaling slowly..."
+            ai_s_mm = f"**သုံးသပ်ချက်:**\n* စုဆောင်းငွေ ရည်မှန်းချက်များအား စနစ်တကျ ထည့်သွင်း တည်ဆောက်ထားပြီး ဖြစ်ပါသည်။\n* တိုးတက်မှု နှေးကွေးခြင်း သတိပြုမိသည်- **'{low_savings.iloc[0]['Goal']}'** သည် သတ်မှတ်ချက်၏ ၃၀% အောက်တွင်သာ ရှိနေသေးပါသည်။"
         else:
-            ai_s_en = "**Analysis:**\n* Outstanding savings metrics detected with highly positive compounding speeds.\n* All active targets are safely pacing toward their respective operational completion timelines.\n\n**Recommendations:**\n* Maintain this powerful asset allocation tempo without disrupting the current configuration.\n* Once a goal hits 100%, re-route that specific stream to establish a wealth-building setup."
-            ai_s_mm = "**သုံးသပ်ချက်:**\n* စုဆောင်းငွေ တိုးတက်မှု အရှိန်အဟုန်သည် အလွန်ကောင်းမွန်ပြီး အပြုသဘောဆောင်သော အခြေအနေတွင် ရှိပါသည်။\n* သတ်မှတ်ထားသော ပန်းတိုင်များအားလုံးသည် သတ်မှတ်ထားသည့် ကာလအလိုက် စနစ်တကျ တိုးတက်နေပါသည်။\n\n**အကြံပြုချက်များ:**\n* လက်ရှိ ကောင်းမွန်သော Ngweကြေးခွဲဝေမှု စည်းကမ်းကို မပျက်ကွက်စေဘဲ ဆက်လက် ထိန်းသိမ်းပါ။\n* ပန်းတိုင်တစ်ခု ပြည့်မြောက်သွားပါက အဆိုပါ စုဆောင်းငွေစီးကြောင်းအား ရင်းနှီးမြှုပ်နှံမှုအသစ်များဆီသို့ လမ်းကြောင်းပြောင်းပါ။"
+            ai_s_en = "**Analysis:**\n* Outstanding savings metrics detected..."
+            ai_s_mm = "**သုံးသပ်ချက်:**\n* စုဆောင်းငွေ တိုးတက်မှု အရှိန်အဟုန်သည် အလွန်ကောင်းမွန်ပြီး..."
     else:
-        ai_s_en = "**Analysis:**\n* No active financial saving targets are registered inside the ledger database.\n* The operational footprint lacks structural isolation barriers to absorb sudden market crashes.\n\n**Recommendations:**\n* Define an Emergency Fund targeting 6 months of basic operational expenses immediately.\n* Start small by setting a minor recurring baseline target that is easily sustainable over time."
-        ai_s_mm = "**သုံးသပ်ချက်:**\n* စနစ်ထဲတွင် စုဆောင်းငွေ ရည်မှန်းချက် ပန်းတိုင်များ တစ်ခုမှ မှတ်တမ်းတင်ထားခြင်း မရှိသေးပါ။\n* မမျှော်လင့်ဘဲ Сီးပွားရေး လှုပ်ခတ်မှုများ သို့မဟုတ် အရေးပေါ်ကိစ္စများ ကြုံလာပါက ခုခံနိုင်စွမ်း အားနည်းနိုင်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* အနည်းဆုံး လုပ်ငန်းလည်ပတ်မှု/လူမှုရေးစရိတ် ၆ လစာအတွက် အရေးပေါ်ရန်ပုံငွေကို အမြန်ဆုံး စတင်သတ်မှတ်ပါ။\n* ရေရှည်တွင် ပုံမှန်စုဆောင်းသွားနိုင်မည့် သေးငယ်သော ပမာဏတစ်ခုဖြင့် ပထမဆုံး စုငွေပန်းတိုင်ကို စတင်ပါ။"
+        ai_s_en = "**Analysis:**\n* No active financial saving targets are registered..."
+        ai_s_mm = "**သုံးသပ်ချက်:**\n* စနစ်ထဲတွင် စုဆောင်းငွေ ရည်မှန်းချက် ပန်းတိုင်များ တစ်ခုမှ မှတ်တမ်းတင်ထားခြင်း မရှိသေးပါ။"
+        
     render_ai_box(text['analysis_title'], ai_s_en, ai_s_mm)
 
 with t3:
