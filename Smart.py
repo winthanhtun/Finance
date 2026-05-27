@@ -54,6 +54,12 @@ LANG_DICT = {
         "add_rec_btn_tab": "Add Recurring",
         "export_csv": "📥 Export CSV",
         "analysis_title": "💡 Insights & Recommendations"
+        "calendar_tab": "📅 Financial Calendar",
+        "calc_tab": "🧮 Savings Calculator",
+        "cal_title": "Monthly Financial Calendar",
+        "calc_title": "Quick Savings Target",
+        "target_amount": "Target Amount",
+        "daily_save": "Daily Savings Goal",
     },
     "မြန်မာ": {
         "page_title": "🔒အသုံးစာရင်းမှတ်တမ်းသို့ ဝင်ရောက်မည်🔒",
@@ -98,6 +104,12 @@ LANG_DICT = {
         "add_rec_btn_tab": "ပုံမှန်စာရင်း ထည့်မည်",
         "export_csv": "📥 CSV ဖိုင်အဖြစ် ထုတ်ယူမည်",
         "analysis_title": "💡 သုံးသပ်ချက်နှင့် အကြံပြုချက်များ"
+        "calendar_tab": "📅 ငွေကြေးပြက္ခဒိန်",
+        "calc_tab": "🧮 စုငွေတွက်ချက်စက်",
+        "cal_title": "လစဉ် ငွေကြေးပြက္ခဒိန်",
+        "calc_title": "စုငွေ ပန်းတိုင်တွက်ချက်မှု",
+        "target_amount": "ပန်းတိုင် ပမာဏ",
+        "daily_save": "နေ့စဉ် စုရန်ပမာဏ",
     }
 }
 
@@ -409,9 +421,9 @@ if not data.empty:
         st.success(text['db_updated'])
         st.rerun()
 
-# --- 7. TABS 8 ခု ---
+# --- 7. TABS 9 ခု ---
 st.markdown("---")
-t1, t2, t3, t4, t5, t6, t7, t8 = st.tabs(text['tab_titles'])
+t1, t2, t3, t4, t5, t6, t7, t8, t9 = st.tabs(text['tab_titles'])
 
 with t1:
     with st.form("tab_b"):
@@ -542,21 +554,40 @@ with t6:
     render_ai_box(text['analysis_title'], ai_rc_en, ai_rc_mm)
 
 with t7:
-    with st.form("tab_r"):
-        rc = st.text_input(text['cat_name'])  # အကြောင်းအရာ
-        ra = st.number_input(text['amount'], min_value=0.0)  # ပမာဏ
-
-        if st.form_submit_button(text['add_rec_btn_tab']):
-            if rc and ra > 0:
-                # database ထဲမှာ error မတက်အောင် default တန်ဖိုးတွေ ထည့်ပေးထားတာပါ
-                new_row_r = pd.DataFrame([["Expense (ထွက်ငွေ)", rc, ra, "Cash", "Monthly"]], columns=rec_df.columns)
-                pd.concat([rec_df, new_row_r], ignore_index=True).to_csv(FILES['rec'], index=False)
-                st.rerun()
-
-    # 💡 ပြင်ဆင်လိုက်သည့်နေရာ: ဇယားထဲမှာ Frequency column ကို ချန်လှပ်ပြီး ပြခိုင်းထားပါတယ်
-    display_rec_df = rec_df[["Type", "Category", "Amount", "Payment Method"]]
-    st.data_editor(display_rec_df, use_container_width=True, num_rows="dynamic", key="editor_rec")
+    st.subheader(text['cal_tab'])
+    
+    # ၁။ Data ကို ပြင်ဆင်ခြင်း
+    # ကိုကို့ရဲ့ data ထဲက Date column ကို datetime ဖြစ်အောင်လုပ်မယ်
+    df_cal = data.copy()
+    df_cal['Date'] = pd.to_datetime(df_cal['Date'])
+    
+    # ၂။ လ/နှစ် ရွေးချယ်ခြင်း
+    selected_year = st.selectbox("ခုနှစ် ရွေးပါ", sorted(df_cal['Date'].dt.year.unique(), reverse=True))
+    selected_month = st.selectbox("လ ရွေးပါ", range(1, 13))
+    
+    # ၃။ ရွေးထားတဲ့ လ/နှစ် အတွက် Data ကို စစ်ထုတ်မယ်
+    monthly_data = df_cal[(df_cal['Date'].dt.year == selected_year) & (df_cal['Date'].dt.month == selected_month)]
+    
+    # ၄။ ပြက္ခဒိန်ပုံစံနဲ့ ပြသခြင်း (နေ့အလိုက် ပေါင်းပေးမယ်)
+    if not monthly_data.empty:
+        daily_summary = monthly_data.groupby('Date')['Amount'].sum().reset_index()
+        daily_summary['Date'] = daily_summary['Date'].dt.strftime('%Y-%m-%d')
+        
+        st.write(f"{selected_year} ခုနှစ်၊ {selected_month} လ အတွက် နေ့စဉ်သုံးစွဲမှု စာရင်း")
+        st.bar_chart(daily_summary.set_index('Date'))
+    else:
+        st.warning("ဒီလအတွက် မှတ်တမ်းမရှိသေးပါ။")
 
 with t8:
+    st.subheader(text['calc_tab'])
+    target = st.number_input("ပန်းတိုင် ပမာဏ (Target Amount):", min_value=1.0)
+    days = st.number_input("ရက်ပေါင်း (Days):", min_value=1)
+    
+    if target > 0 and days > 0:
+        daily_needed = target / days
+        st.metric("နေ့စဉ် စုရန်ပမာဏ:", f"{daily_needed:,.0f} K")
+        st.write(f"ပန်းတိုင်သို့ရောက်ရန် နေ့စဉ် {daily_needed:,.0f} K စုဆောင်းရန် လိုအပ်ပါသည်။")
+
+with t9:
     st.download_button(text['export_csv'], data=data.to_csv(index=False), file_name="finance_archive.csv",
                        mime="text/csv")
