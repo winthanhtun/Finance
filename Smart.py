@@ -192,18 +192,28 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 2. LOGIN SYSTEM ---
-if "logged_in" not in st.session_state: st.session_state["logged_in"] = False
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
 if not st.session_state["logged_in"]:
     st.markdown(f"<h1 style='text-align: center; font-size: 22px; color: #64FFDA;'>{text['page_title']}</h1>", unsafe_allow_html=True)
-    with st.container():
+    
+    # Form အသုံးပြုခြင်း
+    with st.form("login_form"):
         u = st.text_input(text['username'])
         p = st.text_input(text['password'], type="password")
-        if st.button(text['access_btn']):
-            if u == "admin" and p == "12345":
+        
+        # Enter ခေါက်ရင် အလုပ်လုပ်မည့် submit button
+        submit_btn = st.form_submit_button(text['access_btn'])
+        
+        if submit_btn:
+            if u == "admin" and p == "Smart_housekeeper":
                 st.session_state["logged_in"] = True
                 st.rerun()
             else:
                 st.error(text['access_denied'])
+    
+    # Login မဝင်ရသေးရင် page ရဲ့ ကျန်တဲ့အပိုင်းတွေကို မပြအောင် ဒီနေရာမှာ stop ပါ
     st.stop()
 
 # --- 3. DATABASE FILES ---
