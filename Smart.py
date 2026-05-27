@@ -280,36 +280,35 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 📝 New Entry ခေါင်းစဉ်ကို ပြက္ခဒိန်အောက်သို့ ပို့ခြင်း
-# 📝 New Entry
 st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entry']}</h2>", unsafe_allow_html=True)
 
-with st.sidebar.form("main_form", clear_on_submit=True):
-    d_in = st.date_input(text['date'], date.today())
-    t_in = st.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
-    
-    # ၁။ List ကိုယူ
-    budget_categories = b_df['Category'].tolist() + ["အခြား"] 
-    
-    # ၂။ ဒီမှာပဲ ရွေးခိုင်းမယ်
-    c_select = st.selectbox(text['cat_input'], budget_categories)
-    
-    # ၃။ အခြား ရွေးရင်ပေါ်မယ့် Box
-    # ဒီနေရာမှာ key မပါဘဲ ရိုးရိုးလေးပဲ ထားကြည့်ပါ
-    if c_select == "အခြား":
-        c_in = st.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ")
-    else:
-        c_in = c_select
+# 1. Inputs (Form မသုံးတော့ပါ)
+d_in = st.sidebar.date_input(text['date'], date.today())
+t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 
-    a_in = st.number_input(text['amount'], min_value=0.0)
-    p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
-    
-    if st.form_submit_button(text['add_rec_btn']):
-        # c_in က အခု ရွေးထားတဲ့ဟာ (သို့) ရိုက်ထားတဲ့ဟာ ဖြစ်နေပါပြီ
-        if c_in and a_in > 0:
-            type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
-            new_row = pd.DataFrame([[d_in, type_clean, c_in, a_in, p_in, ""]], columns=data.columns)
-            pd.concat([data, new_row], ignore_index=True).to_csv(FILES['db'], index=False)
-            st.rerun()
+# Category ရွေးရန်
+budget_categories = b_df['Category'].tolist() + ["အခြား"] 
+c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
+
+# အခြား ရွေးလျှင် ပေါ်လာမည့် Input
+c_in = c_select
+if c_select == "အခြား":
+    c_in = st.sidebar.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ")
+
+a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
+p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
+
+# 2. Submit Button (Form အပြင်မှာ)
+if st.sidebar.button(text['add_rec_btn']):
+    # ဒီနေရာမှာ စစ်ဆေးမယ်
+    if c_in and a_in > 0:
+        type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
+        new_row = pd.DataFrame([[d_in, type_clean, c_in, a_in, p_in, ""]], columns=data.columns)
+        
+        # Save လုပ်မယ်
+        pd.concat([data, new_row], ignore_index=True).to_csv(FILES['db'], index=False)
+        st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
+        st.rerun() # Page ကို Refresh လုပ်ပေးမယ်
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(text['budget_prog'])
