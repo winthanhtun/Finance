@@ -553,7 +553,7 @@ with t6:
     render_ai_box(text['analysis_title'], ai_rc_en, ai_rc_mm)
 
 with t7:
-    st.subheader(text['cal_tab'])
+    st.subheader(text['calendar_tab'])
     
     # ၁။ Data ကို ပြင်ဆင်ခြင်း
     # ကိုကို့ရဲ့ data ထဲက Date column ကို datetime ဖြစ်အောင်လုပ်မယ်
