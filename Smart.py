@@ -280,7 +280,15 @@ st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entr
 with st.sidebar.form("main_form", clear_on_submit=True):
     d_in = st.date_input(text['date'], date.today())
     t_in = st.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
-    c_in = st.text_input(text['cat_input'])
+    # 1. Budget list ကို အရင်ယူမယ်
+    budget_categories = b_df['Category'].tolist() + ["အခြား"] 
+    
+    # 2. Selectbox နဲ့ အစားထိုးမယ်
+    c_in = st.selectbox(text['cat_input'], budget_categories)
+    
+    # 3. "အခြား" ကို ရွေးမှသာ စာရိုက်တဲ့ box ပေါ်လာအောင် လုပ်မယ်
+    if c_in == "အခြား":
+        c_in = st.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ")
     a_in = st.number_input(text['amount'], min_value=0.0)
     p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
     if st.form_submit_button(text['add_rec_btn']):
