@@ -280,32 +280,35 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 📝 New Entry ခေါင်းစဉ်ကို ပြက္ခဒိန်အောက်သို့ ပို့ခြင်း
-# 📝 New Entry ခေါင်းစဉ်
 st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entry']}</h2>", unsafe_allow_html=True)
+
 with st.sidebar.form("main_form", clear_on_submit=True):
     d_in = st.date_input(text['date'], date.today())
     t_in = st.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
     
-    # ၁။ Budget list ကို ယူမယ်
     budget_categories = b_df['Category'].tolist() + ["အခြား"] 
-    
-    # ၂။ စိတ်ကြိုက် Category အတွက် variable အသစ်သုံးမယ် (c_select)
     c_select = st.selectbox(text['cat_input'], budget_categories)
     
-    # ၃။ အခြား ရွေးမှ ပေါ်မယ့် Input
-    cat_final = c_select # default အတိုင်းယူမယ်
+    # ဖြေရှင်းနည်း - Text Input ကို condition လေးနဲ့ ပိုပြီး တိကျအောင် လုပ်ပါ
+    cat_custom = st.empty() # Placeholder လေးတစ်ခု အရင်ယူထားတယ်
+    cat_final = c_select
+    
     if c_select == "အခြား":
-        # ဒီနေရာမှာ key ထည့်ပေးလိုက်ပါ၊ ဒါမှ ရိုက်လို့ရမှာပါ
-        cat_final = st.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ", key="custom_cat_input")
-        
+        # ဒီနေရာမှာ key ကို static မထားဘဲ အချိန်နဲ့အမျှ ပုံမှန်ဖြစ်အောင် လုပ်ပေးမယ်
+        cat_final = cat_custom.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ", key="c_input_val")
+    else:
+        cat_custom.empty() # အခြားမဟုတ်ရင် ပိတ်ထားမယ်
+
     a_in = st.number_input(text['amount'], min_value=0.0)
     p_in = st.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
     
     if st.form_submit_button(text['add_rec_btn']):
-        # cat_final ကိုပဲ သုံးပါ
-        if cat_final and a_in > 0:
+        # Logic - c_select က အခြားဆိုရင် cat_final (ရိုက်ထားတဲ့ စာ) ကိုယူ၊ မဟုတ်ရင် selectbox ကဟာကိုယူ
+        final_category = cat_final if c_select == "အခြား" else c_select
+        
+        if final_category and a_in > 0:
             type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
-            new_row = pd.DataFrame([[d_in, type_clean, cat_final, a_in, p_in, ""]], columns=data.columns)
+            new_row = pd.DataFrame([[d_in, type_clean, final_category, a_in, p_in, ""]], columns=data.columns)
             pd.concat([data, new_row], ignore_index=True).to_csv(FILES['db'], index=False)
             st.rerun()
 
