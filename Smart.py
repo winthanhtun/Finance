@@ -282,26 +282,33 @@ st.sidebar.markdown(f"""
 # 📝 New Entry ခေါင်းစဉ်ကို ပြက္ခဒိန်အောက်သို့ ပို့ခြင်း
 st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entry']}</h2>", unsafe_allow_html=True)
 
-# ၁။ Form အပြင်ဘက်မှာ အရင်ဆုံး ရွေးချယ်စရာတွေကို တည်ဆောက်မယ်
+# ၁။ Sidebar Inputs များ
 d_in = st.sidebar.date_input(text['date'], date.today())
 t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 
 budget_categories = b_df['Category'].tolist() + ["အခြား"] 
-c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
+c_select = st.sidebar.selectbox(text['cat_input'], budget_categories, key="cat_sel")
 
+# "အခြား" ရွေးရင်ပေါ်မယ့် input အတွက် session_state သုံးမယ်
 cat_final = c_select
 if c_select == "အခြား":
-    cat_final = st.sidebar.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ") # ဒါဆိုရင် Form အပြင်မှာဆိုတော့ သေချာပေါက် ရိုက်လို့ရပြီ
+    cat_final = st.sidebar.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ", key="custom_cat_val")
 
 a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 
-# ၂။ Button ကိုမှ Form ထဲထည့်မယ် (သို့မဟုတ်) ရိုးရိုး Button သုံးမယ်
+# ၂။ Submit Button
 if st.sidebar.button(text['add_rec_btn']):
-    if cat_final and a_in > 0:
+    # Selectbox က "အခြား" ဆိုရင် Text input ကတန်ဖိုးကိုယူ၊ မဟုတ်ရင် Selectbox ကတန်ဖိုးကိုယူ
+    final_val = st.session_state.custom_cat_val if c_select == "အခြား" else c_select
+    
+    if final_val and a_in > 0:
         type_clean = "Income (ဝင်ငွေ)" if text['inc_opt'] in t_in else "Expense (ထွက်ငွေ)"
-        new_row = pd.DataFrame([[d_in, type_clean, cat_final, a_in, p_in, ""]], columns=data.columns)
+        new_row = pd.DataFrame([[d_in, type_clean, final_val, a_in, p_in, ""]], columns=data.columns)
         pd.concat([data, new_row], ignore_index=True).to_csv(FILES['db'], index=False)
+        
+        # အောင်မြင်ရင် Clear လုပ်ပြီး စာမျက်နှာပြန်စမယ်
+        st.session_state.custom_cat_val = "" 
         st.rerun()
 
 st.sidebar.markdown("---")
