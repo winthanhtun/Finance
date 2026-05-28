@@ -307,7 +307,14 @@ st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entr
 d_in = st.sidebar.date_input(text['date'], date.today())
 t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 
-budget_categories = b_df['Category'].tolist() + ["အခြား"] 
+# Debt Category တွေကို ဖိုင်ကနေ ဖတ်မယ်
+if os.path.exists(FILES['debt_cats']):
+    debt_cats_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
+else:
+    debt_cats_list = []
+
+# ရှိပြီးသား Budget Category တွေ + Debt Category တွေ + "အခြား" ကို ပေါင်းလိုက်မယ်
+budget_categories = b_df['Category'].tolist() + debt_cats_list + ["အခြား"] 
 c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
 
 c_in = c_select
