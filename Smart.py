@@ -636,30 +636,34 @@ with t4:
     st.subheader("📊 ဝင်ငွေ/ထွက်ငွေ နှိုင်းယှဉ်ချက် (Area Chart)")
     
     if not data.empty:
-        # 1. Data ပြင်ဆင်ခြင်း
         df_plot = data.copy()
         df_plot['Date'] = pd.to_datetime(df_plot['Date'])
-        
-        # နေ့အလိုက် ဝင်ငွေ/ထွက်ငွေ ပေါင်းခြင်း
         daily_flow = df_plot.groupby(['Date', 'Type'])['Amount'].sum().reset_index()
         
-        # 2. Area Chart ဆွဲခြင်း
-        fig_area = px.area(
-            daily_flow, 
-            x="Date", 
-            y="Amount", 
-            color="Type",
-            template="plotly_dark"
-        )
-        
+        # Chart ဆွဲခြင်း
+        fig_area = px.area(daily_flow, x="Date", y="Amount", color="Type",
+                           color_discrete_map={text['inc_opt']: '#2ECC71', text['exp_opt']: '#E74C3C'},
+                           template="plotly_dark")
         fig_area.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', hovermode="x unified")
         st.plotly_chart(fig_area, use_container_width=True)
         
-        # 3. AI Analysis (စာသားကို မစစ်တော့ဘဲ ရှိသမျှ Type တွေကို အကုန်ပေါင်းပြမယ်)
-        st.write("---")
-        for type_name in daily_flow['Type'].unique():
-            total = daily_flow[daily_flow['Type'] == type_name]['Amount'].sum()
-            st.info(f"**{type_name}:** {total:,.0f} K")
+        # AI သုံးသပ်ချက် (အပြည့်အစုံ)
+        # Type နာမည်တွေကို လှမ်းစစ်ပြီး တွက်ပါမယ်
+        inc_df = daily_flow[daily_flow['Type'] == text['inc_opt']]
+        exp_df = daily_flow[daily_flow['Type'] == text['exp_opt']]
+        
+        total_inc = inc_df['Amount'].sum() if not inc_df.empty else 0
+        total_exp = exp_df['Amount'].sum() if not exp_df.empty else 0
+        net_balance = total_inc - total_exp
+        
+        st.write("### 🤖 AI Financial Analysis")
+        if total_inc > total_exp:
+            st.success(f"**သုံးသပ်ချက်:** အခြေအနေကောင်းပါတယ်။ စုစုပေါင်း ဝင်ငွေ {total_inc:,.0f} K ရှိပြီး၊ ထွက်ငွေက {total_exp:,.0f} K သာ ရှိတဲ့အတွက် လက်ကျန်ငွေ **{net_balance:,.0f} K** စုမိနေပါတယ်။ ဆက်လက်ထိန်းသိမ်းပါ!")
+        elif total_inc < total_exp:
+            st.error(f"**သုံးသပ်ချက်:** သတိပြုရန်! ထွက်ငွေက ဝင်ငွေထက် ပိုများနေပါတယ်။ ဝင်ငွေ {total_inc:,.0f} K သာရှိပြီး ထွက်ငွေ {total_exp:,.0f} K ရှိတဲ့အတွက် **{abs(net_balance):,.0f} K** လောက် လိုအပ်နေပါတယ်။")
+        else:
+            st.info(f"**သုံးသပ်ချက်:** ဝင်ငွေ {total_inc:,.0f} K နှင့် ထွက်ငွေ {total_exp:,.0f} K ညီမျှနေပါတယ်။ စုငွေ မရှိသေးပါ။")
+            
     else:
         st.warning("ပြသရန် Data မရှိသေးပါ။")
 
