@@ -379,47 +379,7 @@ col1, col2, col3 = st.columns(3)
 col1.metric(text['total_inc'], f"{ti:,.0f} K")
 col2.metric(text['total_exp'], f"{te:,.0f} K")
 col3.metric(text['net_bal'], f"{(ti - te):,.0f} K")
-
-# PIE CHARTS & INSIGHTS/RECOMMENDATIONS
-if not data.empty:
-    st.markdown("---")
-    c_chart1, c_chart2 = st.columns(2)
-    with c_chart1:
-        inc_data = data[data["Type"].str.contains("Income", na=False)]
-        if not inc_data.empty:
-            fig_i = px.pie(inc_data, values="Amount", names="Category", title=text['inc_chart'], hole=0.4,
-                           template="plotly_dark", color_discrete_sequence=custom_colors)
-            fig_i.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-            st.plotly_chart(fig_i, use_container_width=True)
-
-            top_inc = inc_data.groupby("Category")["Amount"].sum().idxmax()
-            if ti < 500000:
-                ai_inc_en = f"**Analysis:**\n* Total monthly inflow is currently low ({ti:,.0f} K).\n* High concentration dependency detected on a single category: '{top_inc}'.\n\n**Recommendations:**\n* Actively seek secondary revenue channels or freelance tasks to distribute risk.\n* Build a basic micro-business model to increase operational capital."
-                ai_inc_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း လစဉ်ဝင်ငွေပမာဏသည် နည်းပါးနေပါသေးသည် ({ti:,.0f} K)။\n* ဝင်ငွေစီးဆင်းမှုသည် '{top_inc}' အပေါ်တွင်သာ အဓိက မှီခိုနေရကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* Ngweကြေးဆိုင်ရာ စိုးရိမ်ရမှုကို လျှော့ချရန် ဆိုက်ဒ်လိုင်းအလုပ်များနှင့် အခြားဝင်ငွေလမ်းကြောင်းသစ်များကို ရှာဖွေပါ။\n* လည်ပတ်ငွေ ပိုမိုတိုးပွားလာစေရန် အခြေခံ စီးပွားရေးမော်ဒယ်အသေးစားများ ဖော်ထုတ်လုပ်ကိုင်သင့်ပါသည်။"
-            else:
-                ai_inc_en = f"**Analysis:**\n* Core income generation is operating with great stability.\n* The primary engine driving this capital growth vector is '{top_inc}'.\n\n**Recommendations:**\n* Reallocate a fixed percentage of this cash flow into mid-term investment structures.\n* Scale automated configurations to seamlessly cultivate passive interest layers."
-                ai_inc_mm = f"**သုံးသပ်ချက်:**\n* အဓိက ဝင်ငွေစီးဆင်းမှု စနစ်သည် အလွန်တည်ငြိမ် ကောင်းမွန်သော အခြေအနေတွင် ရှိနေပါသည်။\n* ဝင်ငွေတိုးပွားမှုကို မောင်းနှင်ပေးနေသည့် ပင်မရင်းမြစ်မှာ '{top_inc}' ဖြစ်ကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ရရှိလာသော ပိုလျှံငွေများထဲမှ သတ်မှတ်ရာခိုင်နှုန်းတစ်ခုကို ကာလလတ် ရင်းနှီးမြှုပ်နှံမှုများထဲသို့ ပြောင်းရွှေ့ခွဲဝေပါ။\n* ပက်ဆိဗ်ဝင်ငွေ (Passive Income) ရရှိစေမည့် အလိုအလျောက် စနစ်များကို စတင်တည်ဆောက်ပါ။"
-            render_ai_box(text['analysis_title'], ai_inc_en, ai_inc_mm)
-
-    with c_chart2:
-        exp_data = data[data["Type"].str.contains("Expense", na=False)]
-        if not exp_data.empty:
-            fig_e = px.pie(exp_data, values="Amount", names="Category", title=text['exp_chart'], hole=0.4,
-                           template="plotly_dark", color_discrete_sequence=custom_colors)
-            fig_e.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-            st.plotly_chart(fig_e, use_container_width=True)
-
-            top_exp = exp_data.groupby("Category")["Amount"].sum().idxmax()
-            top_exp_amt = exp_data.groupby("Category")["Amount"].sum().max()
-            pct = (top_exp_amt / te) * 100 if te > 0 else 0
-            if pct > 40:
-                ai_exp_en = f"**Analysis:**\n* Critical spending outflow detected! **'{top_exp}'** consumes a massive {pct:.1f}% of total usage.\n* Structural capital is leaving the loop via a single dominant channel.\n\n**Recommendations:**\n* Immediately enforce strict sub-budget ceilings on **'{top_exp}'** to contain leaks.\n* Postpone non-essential operations inside this specific field for the next 30 days."
-                ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ယိုစိမ့်မှု ကြီးမားစွာ တွေ့ရပြီး **'{top_exp}'** သည် စုစုပေါင်းထွက်ငွေ၏ {pct:.1f}% အထိ ရှိနေပါသည်။\n* Ngweကြေးအမြောက်အမြားသည် ကဏ္ဍတစ်ခုတည်းမှ တဆင့် အဓိက ထွက်ခွာနေကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ယိုစိမ့်မှုများကို ထိန်းချုပ်ရန် **'{top_exp}'** ကဏ္ဍတွင် တင်းကျပ်သော ဘတ်ဂျက်ကန့်သတ်ချက်ကို ချက်ချင်း သတ်မှတ်ပါ။\n* လာမည့် ရက် ၃၀ အတွင်း အဆိုပါကဏ္ဍရှိ မဖြစ်မနေ မဟုတ်သော အသုံးစရိတ်များကို အတတ်နိုင်ဆုံး ဆိုင်းငံ့ထားပါ။"
-            else:
-                ai_exp_en = f"**Analysis:**\n* Outflow patterns are beautifully balanced and evenly distributed across targets.\n* Total operations are protected because no individual sector is capturing excessive weight.\n\n**Recommendations:**\n* Maintain this identical structural allocation format through the next financial tracking phase.\n* Routinely audit minor elements to ensure unexpected cost spikes do not distort this layout."
-                ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ထွက်ရှိမှုပုံစံသည် မျှတမှုရှိပြီး သတ်မှတ်ထားသော ကဏ္ဍများအလိုက် ညီတူညီမျှ ရှိနေပါသည်။\n* ကဏ္ဍတစ်ခုတည်းတွင် ကုန်ကျစရိတ် ပုံမနေသည့်အတွက် အထွေထွေ လည်ပတ်မှုကို မထိခိုက်စေဘဲ ဘေးကင်းပါသည်။\n\n**အကြံပြုချက်များ:**\n* လာမည့် ဘဏ္ဍာရေးကာလများတွင်လည်း ယခုကဲ့သို့ စနစ်တကျ ခွဲဝေသုံးစွဲမှု ပုံစံအတိုင်း ဆက်လက် ထိန်းသိမ်းပါ။\n* မမျှော်လင့်ဘဲ ကုန်ကျစရိတ်များ ရုတ်တရက် မြင့်တက်မလာစေရန် အသေးစား စရိတ်စကများကို ပုံမှန် စစ်ဆေးပါ။"
-            render_ai_box(text['analysis_title'], ai_exp_en, ai_exp_mm)
-
+st.markdown("---") # မျဉ်းကြောင်းလေး တစ်ခုခံလိုက်ရင် ပိုလှပါတယ်
 # 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း
     st.subheader(text['tx_records'])
     if not data.empty:
@@ -467,6 +427,45 @@ if not data.empty:
             
             st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
             st.rerun()
+# PIE CHARTS & INSIGHTS/RECOMMENDATIONS
+if not data.empty:
+    st.markdown("---")
+    c_chart1, c_chart2 = st.columns(2)
+    with c_chart1:
+        inc_data = data[data["Type"].str.contains("Income", na=False)]
+        if not inc_data.empty:
+            fig_i = px.pie(inc_data, values="Amount", names="Category", title=text['inc_chart'], hole=0.4,
+                           template="plotly_dark", color_discrete_sequence=custom_colors)
+            fig_i.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_i, use_container_width=True)
+
+            top_inc = inc_data.groupby("Category")["Amount"].sum().idxmax()
+            if ti < 500000:
+                ai_inc_en = f"**Analysis:**\n* Total monthly inflow is currently low ({ti:,.0f} K).\n* High concentration dependency detected on a single category: '{top_inc}'.\n\n**Recommendations:**\n* Actively seek secondary revenue channels or freelance tasks to distribute risk.\n* Build a basic micro-business model to increase operational capital."
+                ai_inc_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း လစဉ်ဝင်ငွေပမာဏသည် နည်းပါးနေပါသေးသည် ({ti:,.0f} K)။\n* ဝင်ငွေစီးဆင်းမှုသည် '{top_inc}' အပေါ်တွင်သာ အဓိက မှီခိုနေရကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* Ngweကြေးဆိုင်ရာ စိုးရိမ်ရမှုကို လျှော့ချရန် ဆိုက်ဒ်လိုင်းအလုပ်များနှင့် အခြားဝင်ငွေလမ်းကြောင်းသစ်များကို ရှာဖွေပါ။\n* လည်ပတ်ငွေ ပိုမိုတိုးပွားလာစေရန် အခြေခံ စီးပွားရေးမော်ဒယ်အသေးစားများ ဖော်ထုတ်လုပ်ကိုင်သင့်ပါသည်။"
+            else:
+                ai_inc_en = f"**Analysis:**\n* Core income generation is operating with great stability.\n* The primary engine driving this capital growth vector is '{top_inc}'.\n\n**Recommendations:**\n* Reallocate a fixed percentage of this cash flow into mid-term investment structures.\n* Scale automated configurations to seamlessly cultivate passive interest layers."
+                ai_inc_mm = f"**သုံးသပ်ချက်:**\n* အဓိက ဝင်ငွေစီးဆင်းမှု စနစ်သည် အလွန်တည်ငြိမ် ကောင်းမွန်သော အခြေအနေတွင် ရှိနေပါသည်။\n* ဝင်ငွေတိုးပွားမှုကို မောင်းနှင်ပေးနေသည့် ပင်မရင်းမြစ်မှာ '{top_inc}' ဖြစ်ကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ရရှိလာသော ပိုလျှံငွေများထဲမှ သတ်မှတ်ရာခိုင်နှုန်းတစ်ခုကို ကာလလတ် ရင်းနှီးမြှုပ်နှံမှုများထဲသို့ ပြောင်းရွှေ့ခွဲဝေပါ။\n* ပက်ဆိဗ်ဝင်ငွေ (Passive Income) ရရှိစေမည့် အလိုအလျောက် စနစ်များကို စတင်တည်ဆောက်ပါ။"
+            render_ai_box(text['analysis_title'], ai_inc_en, ai_inc_mm)
+
+    with c_chart2:
+        exp_data = data[data["Type"].str.contains("Expense", na=False)]
+        if not exp_data.empty:
+            fig_e = px.pie(exp_data, values="Amount", names="Category", title=text['exp_chart'], hole=0.4,
+                           template="plotly_dark", color_discrete_sequence=custom_colors)
+            fig_e.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_e, use_container_width=True)
+
+            top_exp = exp_data.groupby("Category")["Amount"].sum().idxmax()
+            top_exp_amt = exp_data.groupby("Category")["Amount"].sum().max()
+            pct = (top_exp_amt / te) * 100 if te > 0 else 0
+            if pct > 40:
+                ai_exp_en = f"**Analysis:**\n* Critical spending outflow detected! **'{top_exp}'** consumes a massive {pct:.1f}% of total usage.\n* Structural capital is leaving the loop via a single dominant channel.\n\n**Recommendations:**\n* Immediately enforce strict sub-budget ceilings on **'{top_exp}'** to contain leaks.\n* Postpone non-essential operations inside this specific field for the next 30 days."
+                ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ယိုစိမ့်မှု ကြီးမားစွာ တွေ့ရပြီး **'{top_exp}'** သည် စုစုပေါင်းထွက်ငွေ၏ {pct:.1f}% အထိ ရှိနေပါသည်။\n* Ngweကြေးအမြောက်အမြားသည် ကဏ္ဍတစ်ခုတည်းမှ တဆင့် အဓိက ထွက်ခွာနေကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ယိုစိမ့်မှုများကို ထိန်းချုပ်ရန် **'{top_exp}'** ကဏ္ဍတွင် တင်းကျပ်သော ဘတ်ဂျက်ကန့်သတ်ချက်ကို ချက်ချင်း သတ်မှတ်ပါ။\n* လာမည့် ရက် ၃၀ အတွင်း အဆိုပါကဏ္ဍရှိ မဖြစ်မနေ မဟုတ်သော အသုံးစရိတ်များကို အတတ်နိုင်ဆုံး ဆိုင်းငံ့ထားပါ။"
+            else:
+                ai_exp_en = f"**Analysis:**\n* Outflow patterns are beautifully balanced and evenly distributed across targets.\n* Total operations are protected because no individual sector is capturing excessive weight.\n\n**Recommendations:**\n* Maintain this identical structural allocation format through the next financial tracking phase.\n* Routinely audit minor elements to ensure unexpected cost spikes do not distort this layout."
+                ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ထွက်ရှိမှုပုံစံသည် မျှတမှုရှိပြီး သတ်မှတ်ထားသော ကဏ္ဍများအလိုက် ညီတူညီမျှ ရှိနေပါသည်။\n* ကဏ္ဍတစ်ခုတည်းတွင် ကုန်ကျစရိတ် ပုံမနေသည့်အတွက် အထွေထွေ လည်ပတ်မှုကို မထိခိုက်စေဘဲ ဘေးကင်းပါသည်။\n\n**အကြံပြုချက်များ:**\n* လာမည့် ဘဏ္ဍာရေးကာလများတွင်လည်း ယခုကဲ့သို့ စနစ်တကျ ခွဲဝေသုံးစွဲမှု ပုံစံအတိုင်း ဆက်လက် ထိန်းသိမ်းပါ။\n* မမျှော်လင့်ဘဲ ကုန်ကျစရိတ်များ ရုတ်တရက် မြင့်တက်မလာစေရန် အသေးစား စရိတ်စကများကို ပုံမှန် စစ်ဆေးပါ။"
+            render_ai_box(text['analysis_title'], ai_exp_en, ai_exp_mm)
 
 # --- 7. TABS 9 ခု ---
 st.markdown("---")
