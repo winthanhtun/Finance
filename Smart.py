@@ -419,7 +419,7 @@ if not data.empty:
 
     edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
 
-   if st.button(text['save_changes']):
+    if st.button(text['save_changes']):
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
         
