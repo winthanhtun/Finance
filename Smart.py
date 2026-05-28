@@ -10,6 +10,10 @@ import plotly.express as px
 st.set_page_config(page_title="Personal Finance Pro", layout="wide")
 st.markdown("""
     <style>
+    /* ခေါင်းစဉ် (Header) ကို အောက်နည်းနည်းရွှေ့ရန် */
+    div.stTitle {
+        margin-top: 30px !important;
+    }
     /* အပေါ်အောက် အကွာအဝေးကို လျှော့ချရန် */
     .block-container {
         padding-top: 2rem;
