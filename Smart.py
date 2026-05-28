@@ -327,7 +327,7 @@ p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 # 2. Submit Button
 if st.sidebar.button(text['add_rec_btn']):
     if c_in and a_in > 0:
-        type_clean = "Income (ဝင်ငွေ)" if t_in == text['inc_opt'] else "Expense (ထွက်ငွေ)"
+        type_clean = t_in
         
         # ၁။ CSV ထဲကို အချက်အလက်သစ်သွင်းမယ်
         new_row = pd.DataFrame({
