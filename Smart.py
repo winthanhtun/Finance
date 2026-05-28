@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 from datetime import date, datetime
 import os
-import uuid
 import plotly.express as px
 
 
@@ -361,14 +360,12 @@ for _, r in b_df.iterrows():
     limit_val = r['Limit']
     
     # တွက်ချက်မှု: စာရင်းထဲမှာ Expense (ထွက်ငွေ) အမျိုးအစားထဲက သက်ဆိုင်ရာ Category ကို ရှာပြီး ပေါင်းမယ်
-    used = data[(data["Type"] == "Expense (ထွက်ငွေ)") & (data["Category"] == category_name)]["Amount"].sum()
+    used = data[(data["Type"] == text['exp_opt']) & (data["Category"] == category_name)]["Amount"].sum()
     
     # Progress Bar နဲ့ အချက်အလက် ပြသခြင်း
     st.sidebar.write(f"**{category_name}**: {used:,.0f} / {limit_val:,.0f}")
     
     # ရာခိုင်နှုန်းတွက်ပြီး Progress Bar ပြခြင်း
-    progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
-    # တွက်ချက်ခြင်း
     progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
     
     # ရာခိုင်နှုန်းပေါ်မူတည်ပြီး အရောင်သတ်မှတ်ခြင်း
@@ -616,6 +613,7 @@ with t3:
                 
                 st.write(f"### {cat}")
                 st.write(f"လက်ကျန်အကြွေး: {net_debt:,.0f} K")
+                # Progress bar (max 100000 K ကို အခြေခံထားသည်)
                 progress = min(max(net_debt / 100000, 0), 1.0)
                 st.progress(progress)
                 st.divider()
