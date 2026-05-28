@@ -8,7 +8,29 @@ import plotly.express as px
 
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance Pro", layout="wide")
-
+st.markdown("""
+    <style>
+    /* အပေါ်အောက် အကွာအဝေးကို လျှော့ချရန် */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    /* Metric တွေရဲ့ အောက်က အကွာအဝေး */
+    [data-testid="stMetric"] {
+        margin-bottom: 0px;
+    }
+    /* ခေါင်းစဉ် (subheader) တွေရဲ့ အောက်က အကွာအဝေး */
+    h3 {
+        margin-top: 0px;
+        margin-bottom: 10px;
+    }
+    /* မျဉ်းကြောင်း (divider) တွေရဲ့ အကွာအဝေး */
+    hr {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 # --- MULTILINGUAL DICTIONARY (Translation Data) ---
 LANG_DICT = {
     "English": {
