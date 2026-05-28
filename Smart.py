@@ -14,13 +14,13 @@ st.markdown("""
     <style>
     /* Page တစ်ခုလုံးရဲ့ အပေါ်ပိုင်းကိုပဲ ချိန်ညှိမယ် */
     .block-container {
-        padding-top: 1rem; /* ဒီဂဏန်းကို တိုးရင် ခေါင်းစဉ်က အောက်ကို ရွေ့လာမယ် */
+        padding-top: 1rem;
         padding-bottom: 1rem;
     }
     
     /* Header (Title) ကိုပဲ သီးသန့် အောက်ရွှေ့ချင်ရင် */
     h1 {
-        margin-top: 20px !important; /* ဒီမှာ 20px သို့မဟုတ် 40px စမ်းကြည့်ပါ */
+        margin-top: 50px !important;
     }
 
     /* ကျန်တဲ့ Metric, Subheader, Divider တွေအတွက် */
