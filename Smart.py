@@ -242,16 +242,21 @@ if not st.session_state["logged_in"]:
 # --- 3. DATABASE FILES ---
 FILES = {
     'db': "database.csv", 'budget': "budget.csv", 'savings': "savings.csv",
-    'debt': "debt.csv", 'rec': "recurring.csv",'debt_cats': 'debt_categories.csv'
+    'debt': "debt.csv", 'rec': "recurring.csv", 'debt_cats': 'debt_categories.csv'
 }
-if not os.path.exists("receipts"): os.makedirs("receipts")
 
+# Receipts ဖိုဒါရှိမရှိ စစ်ဆေးခြင်း
+if not os.path.exists("receipts"): 
+    os.makedirs("receipts")
 
+# Data အမြန်ဖတ်နိုင်ရန် Cache သုံးခြင်း
+@st.cache_data(ttl=1)
 def load_data(f, cols):
-    if not os.path.exists(f): pd.DataFrame(columns=cols).to_csv(f, index=False)
+    if not os.path.exists(f): 
+        pd.DataFrame(columns=cols).to_csv(f, index=False)
     return pd.read_csv(f)
 
-
+# Data များကို Load လုပ်ခြင်း
 data = load_data(FILES['db'], ["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"])
 b_df = load_data(FILES['budget'], ["Category", "Limit"])
 s_df = load_data(FILES['savings'], ["Goal", "Target", "Saved"])
