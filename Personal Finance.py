@@ -7,7 +7,7 @@ import plotly.express as px
 
 
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
-st.set_page_config(page_title="Personal Finance Pro", layout="wide")
+st.set_page_config(page_title="Personal Finance", layout="wide")
 
 st.markdown("""
     <style>
@@ -32,7 +32,7 @@ st.markdown("""
 # --- MULTILINGUAL DICTIONARY (Translation Data) ---
 LANG_DICT = {
     "English": {
-        "page_title": "🔒 Finance Pro Login 🔒",
+        "page_title": "🔒 Personal Finance Login 🔒",
         "username": "Username",
         "password": "Password",
         "access_btn": "Access Dashboard",
@@ -81,7 +81,7 @@ LANG_DICT = {
         "daily_save": "Daily Savings Goal",
     },
     "မြန်မာ": {
-        "page_title": "🔒အသုံးစာရင်းမှတ်တမ်းသို့ ဝင်ရောက်မည်🔒",
+        "page_title": "🔒အသုံးစာရင်းမှတ်တမ်းသို့ဝင်ရောက်မည်🔒",
         "username": "အသုံးပြုသူအမည်",
         "password": "စကားဝှက်",
         "access_btn": "ဝင်ရောက်မည်",
@@ -102,7 +102,7 @@ LANG_DICT = {
         "net_bal": "လက်ကျန်ငွေ",
         "inc_chart": "💵 ဝင်ငွေ အသေးစိတ် ခွဲခြမ်းစိတ်ဖြာမှု",
         "exp_chart": "💰 ထွက်ငွေ အသေးစိတ် ခွဲခြမ်းစိတ်ဖြာမှု",
-        "tx_records": "📑 ငွေ ပေးချေ/လက်ခံ မှုမှတ်တမ်းများ",
+        "tx_records": "📑 ငွေပေးချေ/လက်ခံ မှုမှတ်တမ်းများ",
         "save_changes": " ပြင်ဆင်ချက် သိမ်းဆည်းမည်",
         "db_updated": " အချက်အလက်များအောင်မြင်စွာ ပြုပြင်သိမ်းဆည်း ပြီးပါပြီ!",
         "tab_titles": ["💰 ဘတ်ဂျက်", "🎯 စုငွေ", "💸 အကြွေး", "📊 နှိုင်းယှဉ်ချက်", "💳 ငွေပေးချေမှု", "🧾 ပြေစာ", "📅 ငွေကြေးပြက္ခဒိန်", "🧮 စုငွေတွက်ချက်စက်", "📁 သိမ်းဆည်းရန်"],
@@ -137,7 +137,6 @@ LANG_DICT = {
 title_col, lang_col = st.columns([9.2, 1.4])
 
 with lang_col:
-    # label_visibility="collapsed" ကို ပြန်သုံးပြီး ဘောက်စ်ကို ပိုသေးကျစ်စေပါသည်
     lang = st.selectbox("ဘာသာစကား", ["English", "မြန်မာ"], index=0)
     text = LANG_DICT[lang]
 
@@ -354,12 +353,10 @@ if st.sidebar.button(text['add_rec_btn']):
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(text['budget_prog'])
-# အသုံးစရိတ် Data ထဲမှာ "Expense (ထွက်ငွေ)" ဆိုတဲ့ စာသား အတိအကျပါမှ တွက်အောင်လုပ်ပါ
 for _, r in b_df.iterrows():
     category_name = r['Category']
     limit_val = r['Limit']
     
-    # တွက်ချက်မှု: စာရင်းထဲမှာ Expense (ထွက်ငွေ) အမျိုးအစားထဲက သက်ဆိုင်ရာ Category ကို ရှာပြီး ပေါင်းမယ်
     used = data[(data["Type"] == text['exp_opt']) & (data["Category"] == category_name)]["Amount"].sum()
     
     # Progress Bar နဲ့ အချက်အလက် ပြသခြင်း
@@ -406,7 +403,7 @@ col3.metric(text['net_bal'], f"{(ti - te):,.0f} K")
 st.divider() 
 
 # 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း
-st.subheader(text['tx_records']) # ဒီလိုင်းကို ဘယ်ဘက်အစွန်ဆုံးထိ ကပ်လိုက်ပါ
+st.subheader(text['tx_records']) 
 if not data.empty:
     df_v = data.copy()
     df_v["Income"] = df_v.apply(lambda x: x["Amount"] if "Income" in str(x["Type"]) else 0, axis=1)
