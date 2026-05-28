@@ -378,7 +378,7 @@ col1, col2, col3 = st.columns(3)
 col1.metric(text['total_inc'], f"{ti:,.0f} K")
 col2.metric(text['total_exp'], f"{te:,.0f} K")
 col3.metric(text['net_bal'], f"{(ti - te):,.0f} K")
-st.markdown("---") 
+st.divider() 
 
 # 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း
 st.subheader(text['tx_records']) # ဒီလိုင်းကို ဘယ်ဘက်အစွန်ဆုံးထိ ကပ်လိုက်ပါ
@@ -417,7 +417,7 @@ if not data.empty:
         st.rerun()
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
 if not data.empty:
-    st.markdown("---")
+    st.divider()
     c_chart1, c_chart2 = st.columns(2)
     with c_chart1:
         inc_data = data[data["Type"].str.contains("Income", na=False)]
@@ -456,7 +456,7 @@ if not data.empty:
             render_ai_box(text['analysis_title'], ai_exp_en, ai_exp_mm)
 
 # --- 7. TABS 9 ခု ---
-st.markdown("---")
+st.divider()
 # အရင်က ၈ ခုနေရာမှာ အခု ၉ ခုဖြစ်သွားပါပြီ
 t1, t2, t3, t4, t5, t6, t7, t8, t9 = st.tabs(text['tab_titles'])
 
