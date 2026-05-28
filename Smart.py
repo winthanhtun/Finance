@@ -564,33 +564,63 @@ with t2:
     render_ai_box(text['analysis_title'], ai_s_en, ai_s_mm)
 
 with t3:
-    with st.form("tab_d"):
-        dn, dt, da = st.text_input(text['name']), st.selectbox(text['type'],
-                                                               [text['to_receive'], text['to_pay']]), st.number_input(
-            text['amount'])
-        if st.form_submit_button(text['add_debt']):
-            pd.concat([d_df, pd.DataFrame([[dn, dt, da]], columns=d_df.columns)], ignore_index=True).to_csv(
-                FILES['debt'], index=False)
-            st.rerun()
-    edited_d = st.data_editor(d_df, use_container_width=True, num_rows="dynamic", key="editor_d")
-    if st.button(text['save_changes'], key="btn_save_d"):
-        edited_d.to_csv(FILES['debt'], index=False)
-        st.success(text['db_updated'])
-        st.rerun()
+        st.subheader("အကြွေးစာရင်းနှင့် Progress Bar များ")
+        
+        # ၁။ Category အသစ်ဖန်တီးရန်
+        with st.form("new_debt_cat_form"):
+            new_cat = st.text_input("အကြွေးစာရင်း အမည်သစ် (ဥပမာ- မေမေ, ကိုကြီး)")
+            if st.form_submit_button("Create Debt Category"):
+                if new_cat:
+                    if os.path.exists(FILES['debt_cats']):
+                        cats_df = pd.read_csv(FILES['debt_cats'])
+                    else:
+                        cats_df = pd.DataFrame(columns=['Category'])
+                    
+                    if new_cat not in cats_df['Category'].values:
+                        cats_df = pd.concat([cats_df, pd.DataFrame([new_cat], columns=['Category'])], ignore_index=True)
+                        cats_df.to_csv(FILES['debt_cats'], index=False)
+                        st.success(f"'{new_cat}' ကို အကြွေးစာရင်းထဲ ထည့်လိုက်ပါပြီ။")
+                        st.rerun()
+                    else:
+                        st.warning("ဒီနာမည် ရှိပြီးသားပါ။")
 
-    if not d_df.empty:
-        tp = d_df[d_df["Type"] == text['to_pay']]["Amount"].sum()
-        tr = d_df[d_df["Type"] == text['to_receive']]["Amount"].sum()
-        if tp > tr:
-            ai_d_en = f"**Analysis:**\n* Negative Debt Variance detected: Total Outward Debt ({tp:,.0f} K) scales higher than Receivables ({tr:,.0f} K).\n* This structure places net liquid capital positions under constant recurring stress.\n\n**Recommendations:**\n* Adopt the Debt Avalanche system by paying off the highest interest profile entries first.\n* Halt all extra credit exposure pipelines until this balance sheet ratio matches equilibrium."
-            ai_d_mm = f"**သုံးသပ်ချက်:**\n* အနုတ်လက္ခဏာဆောင်သော အကြွေးအခြေအနေ တွေ့ရှိရသည်- ပေးရန်ရှိသော အကြွေးစုစုပေါင်း ({tp:,.0f} K) သည် ရရန်ရှိသည်များ ({tr:,.0f} K) ထက် များနေပါသည်။\n* ဤအခြေအနေသည် လက်ရှိ လည်ပတ်ငွေစီးဆင်းမှုအပေါ် အမြဲတမ်း ဖိအားဖြစ်စေနိုင်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* အတိုးနှုန်း အမြင့်ဆုံးရှိသော အကြွေးများကို အရင်ဆုံး အပြတ်ရှင်းသည့် Debt Avalanche စနစ်ကို အသုံးပြုပါ။\n* ဤအကြွေးအချိုးအစား မျှတမှု မရှိမချင်း နောက်ထပ် အကြွေးယူခြင်း သို့မဟုတ် အကြွေးဝယ်ယူမှုများကို လုံးဝ ရပ်ဆိုင်းထားပါ။"
+        # ၂။ Transaction Data မှ အကြွေးတွက်ချက်ခြင်း
+        if os.path.exists(FILES['debt_cats']) and os.path.exists(FILES['db']):
+            debt_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
+            df_db = pd.read_csv(FILES['db'])
+            
+            total_net_debt = 0 # AI အတွက် ပေါင်းထားဖို့
+            
+            for cat in debt_list:
+                if cat in df_db['Category'].values:
+                    cat_data = df_db[df_db['Category'] == cat]
+                    # Income = ချေးယူ (တိုး) / Expense = ဆပ်ငွေ (လျော့)
+                    income = cat_data[cat_data['Type'].str.contains('Income', na=False)]['Amount'].sum()
+                    expense = cat_data[cat_data['Type'].str.contains('Expense', na=False)]['Amount'].sum()
+                    net_debt = income - expense
+                    total_net_debt += net_debt
+                    
+                    st.write(f"### {cat}")
+                    st.write(f"လက်ကျန်အကြွေး: {net_debt:,.0f} K")
+                    # Progress bar (max 100000 K ကို အခြေခံထားသည်)
+                    progress = min(max(net_debt / 100000, 0), 1.0)
+                    st.progress(progress)
+                    st.divider()
+
+            # ၃။ AI Analysis အပိုင်း (အခုရလာတဲ့ total_net_debt ကို အခြေခံမည်)
+            if total_net_debt > 0:
+                ai_d_en = f"**Analysis:**\n* Total Outstanding Debt tracked: {total_net_debt:,.0f} K.\n* Your ledger shows active debt liabilities that require monitoring."
+                ai_d_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း အကြွေးကျန်မှာ {total_net_debt:,.0f} K ရှိပါသည်။\n* အကြွေးများ မထပ်အောင် စနစ်တကျ ပြန်လည်ဆပ်ရန် လိုအပ်ပါသည်။"
+            elif total_net_debt < 0:
+                ai_d_en = "**Analysis:**\n* Credit balance positive: You have overpaid or have a surplus in debt-related accounts."
+                ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးစာရင်းမှာ ပိုနေပါသည်။ ပေးရန်ရှိသည်ထက် ပိုမိုဆပ်ထားခြင်း သို့မဟုတ် လက်ကျန်ငွေ ပိုနေခြင်း ဖြစ်ပါသည်။"
+            else:
+                ai_d_en = "**Analysis:**\n* Clean debt ledger with zero outstanding negative liability entries tracked."
+                ai_d_mm = "**သုံးသပ်ချက်:**\n* ပေးရန်ရှိသော အကြွေးစာရင်း လုံးဝမရှိဘဲ သန့်ရှင်း စင်ကြယ်နေသည်ကို တွေ့ရှိရပါသည်။"
+            
+            render_ai_box(text['analysis_title'], ai_d_en, ai_d_mm)
         else:
-            ai_d_en = f"**Analysis:**\n* Receivable ledger holds dominance ({tr:,.0f} K asset potential mapped inside storage).\n* Net net liquidity is strong, but capital remains tied down in uncollected non-liquid form.\n\n**Recommendations:**\n* Deploy formal follow-up intervals with debtors to convert entries back into active cash.\n* Avoid locking fresh funds into unsecured peer structures to safeguard active capital safety."
-            ai_d_mm = f"**သုံးသပ်ချက်:**\n* ရရန်ရှိသော စာရင်းက ပိုမိုများပြားပြီး အသာစီးရနေပါသည် ({tr:,.0f} K ခန့် မှတ်တမ်းတင်ထားရှိပါသည်)။\n* Ngweကြေးအင်အား ကောင်းမွန်သော်လည်း လက်တွေ့ အသုံးချ၍မရသေးသော ပုံစံဖြင့် Ngweများ ပိတ်မိနေကြောင်း တွေ့ရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ရရန်ရှိသော Ngweများ လက်ဝယ်သို့ အမှန်တကယ် ပြန်လည်ရောက်ရှိလာစေရန် စနစ်တကျ တောင်းခံမှုများ ပြုလုပ်ပါ။\n* လက်ရှိ လည်ပတ်ငွေ လုံခြုံမှုရှိစေရန် အာမခံချက်မရှိသော အကြွေးထုတ်ပေးမှုအသစ်များကို ထပ်မံ မပြုလုပ်ပါနှင့်။"
-    else:
-        ai_d_en = "**Analysis:**\n* Clean debt ledger with zero outstanding negative liability entries tracked.\n* Your current financial risk exposure profile is exceptionally low and secure.\n\n**Recommendations:**\n* Restrict future debt usage solely to high-yield strategic growth or asset investments.\n* Avoid using commercial credit instruments for daily consumable costs or fast-depreciating assets."
-        ai_d_mm = "**သုံးသပ်ချက်:**\n* ပေးရန်ရှိသော အကြွေးစာရင်း လုံးဝမရှိဘဲ သန့်ရှင်း စင်ကြယ်နေသည်ကို တွေ့ရှိရပါသည်။\n* လက်ရှိ Ngweကြေးဆိုင်ရာ စွန့်စားရမှု အဆင့်အတန်းသည် အလွန်နည်းပါးပြီး ဘေးကင်းစိတ်ချရသော အနေအထား ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* နောင်တွင် အကြွေးယူမည်ဆိုပါက အကျိုးအမြတ်များမည့် လုပ်ငန်းတိုးချဲ့မှု သို့မဟုတ် ရင်းနှီးမြှုပ်နှံမှုများအတွက်သာ သုံးပါ။\n* နေ့စဉ် အသုံးစရိတ်များ သို့မဟုတ် တန်ဖိုးကျလွယ်သော ပစ္စည်းများအတွက် အကြွေးယူခြင်းကို လုံးဝ ရှောင်ကြဉ်ပါ။"
-    render_ai_box(text['analysis_title'], ai_d_en, ai_d_mm)
+            st.info("အကြွေးစာရင်း သို့မဟုတ် Transaction Data မရှိသေးပါ။")
 
 with t4:
     if not data.empty:
