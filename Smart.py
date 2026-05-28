@@ -12,8 +12,8 @@ st.markdown("""
     <style>
     /* အပေါ်အောက် အကွာအဝေးကို လျှော့ချရန် */
     .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
     }
     /* Metric တွေရဲ့ အောက်က အကွာအဝေး */
     [data-testid="stMetric"] {
@@ -22,12 +22,12 @@ st.markdown("""
     /* ခေါင်းစဉ် (subheader) တွေရဲ့ အောက်က အကွာအဝေး */
     h3 {
         margin-top: 0px;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
     /* မျဉ်းကြောင်း (divider) တွေရဲ့ အကွာအဝေး */
     hr {
-        margin-top: 10px;
-        margin-bottom: 10px;
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
     </style>
     """, unsafe_allow_html=True)
