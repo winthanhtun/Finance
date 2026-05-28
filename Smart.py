@@ -371,7 +371,6 @@ user_color_2 = st.sidebar.color_picker("Chart Color - Theme B", "#FF6B6B")
 custom_colors = [user_color_1, user_color_2]
 
 # --- 5. MAIN DASHBOARD ---
-
 ti = data[data["Type"].str.contains("Income", na=False)]["Amount"].sum() if not data.empty else 0
 te = data[data["Type"].str.contains("Expense", na=False)]["Amount"].sum() if not data.empty else 0
 
@@ -379,54 +378,43 @@ col1, col2, col3 = st.columns(3)
 col1.metric(text['total_inc'], f"{ti:,.0f} K")
 col2.metric(text['total_exp'], f"{te:,.0f} K")
 col3.metric(text['net_bal'], f"{(ti - te):,.0f} K")
-st.markdown("---") # မျဉ်းကြောင်းလေး တစ်ခုခံလိုက်ရင် ပိုလှပါတယ်
+st.markdown("---") 
+
 # 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း
-    st.subheader(text['tx_records'])
-    if not data.empty:
-        df_v = data.copy()
-        # Amount တွေကို Income/Expense အလိုက် ပြန်ခွဲထုတ်ခြင်း
-        df_v["Income"] = df_v.apply(lambda x: x["Amount"] if "Income" in str(x["Type"]) else 0, axis=1)
-        df_v["Expense"] = df_v.apply(lambda x: x["Amount"] if "Expense" in str(x["Type"]) else 0, axis=1)
+st.subheader(text['tx_records']) # ဒီလိုင်းကို ဘယ်ဘက်အစွန်ဆုံးထိ ကပ်လိုက်ပါ
+if not data.empty:
+    df_v = data.copy()
+    df_v["Income"] = df_v.apply(lambda x: x["Amount"] if "Income" in str(x["Type"]) else 0, axis=1)
+    df_v["Expense"] = df_v.apply(lambda x: x["Amount"] if "Expense" in str(x["Type"]) else 0, axis=1)
 
-        total_row = pd.DataFrame([{"Date": "TOTAL", "Type": "", "Category": "", "Income": df_v["Income"].sum(),
-                                   "Expense": df_v["Expense"].sum(), "Payment Method": "", "Receipt": ""}])
+    total_row = pd.DataFrame([{"Date": "TOTAL", "Type": "", "Category": "", "Income": df_v["Income"].sum(),
+                               "Expense": df_v["Expense"].sum(), "Payment Method": "", "Receipt": ""}])
+    
+    final_table = pd.concat([df_v[["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Receipt"]], total_row])
+
+    edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
+
+    if st.button(text['save_changes']):
+        clean_df = edited[edited["Date"] != "TOTAL"].copy()
+        clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
+        clean_df["Type"] = clean_df.apply(lambda x: "Income (ဝင်ငွေ)" if x["Income"] > 0 else "Expense (ထွက်ငွေ)", axis=1)
+        final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"]]
+        final_save.to_csv(FILES['db'], index=False)
         
-        final_table = pd.concat([df_v[["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Receipt"]], total_row])
-
-        edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
-
-        if st.button(text['save_changes']):
-            # ၁။ ဇယားကို သန့်စင်ခြင်း
-            clean_df = edited[edited["Date"] != "TOTAL"].copy()
-            # အကယ်၍ Amount ကို Income + Expense ဆိုပြီး ပြန်ပေါင်းရင် Type လေးကို သေချာစစ်ဖို့လိုတယ်
-            clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
-            
-            # Type Column ကို ပြန်သတ်မှတ်ပေးမယ် (Income/Expense ခွဲထားတာတွေကို ပြန်စုမယ်)
-            clean_df["Type"] = clean_df.apply(lambda x: "Income (ဝင်ငွေ)" if x["Income"] > 0 else "Expense (ထွက်ငွေ)", axis=1)
-            
-            final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"]]
-            final_save.to_csv(FILES['db'], index=False)
-            
-            # ၂။ Savings ဇယားကို ပြန်တွက်ခြင်း (အဓိက အပိုင်း)
-            if os.path.exists(FILES['savings']):
-                s_df = pd.read_csv(FILES['savings'])
-                s_df['Saved'] = 0 
-                
-                for index, row in s_df.iterrows():
-                    goal = row['Goal']
-                    # ဒီနေရာမှာ 'Expense (ထွက်ငွေ)' ဆိုတဲ့ စာသားအတိုင်းပဲလား စစ်ပေးပါ
-                    # ဒါမှမဟုတ် Type ထဲက "Expense" ဆိုတဲ့ စာလုံးပါတာနဲ့တင် တွက်ပေးမယ်
-                    total = final_save[
-                        (final_save["Type"].str.contains("Expense", case=False, na=False)) & 
-                        (final_save['Category'] == goal)
-                    ]['Amount'].sum()
-                    
-                    s_df.at[index, 'Saved'] = total
-                
-                s_df.to_csv(FILES['savings'], index=False)
-            
-            st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
-            st.rerun()
+        if os.path.exists(FILES['savings']):
+            s_df = pd.read_csv(FILES['savings'])
+            s_df['Saved'] = 0 
+            for index, row in s_df.iterrows():
+                goal = row['Goal']
+                total = final_save[
+                    (final_save["Type"].str.contains("Expense", case=False, na=False)) & 
+                    (final_save['Category'] == goal)
+                ]['Amount'].sum()
+                s_df.at[index, 'Saved'] = total
+            s_df.to_csv(FILES['savings'], index=False)
+        
+        st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
+        st.rerun()
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
 if not data.empty:
     st.markdown("---")
