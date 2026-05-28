@@ -761,5 +761,36 @@ with t8:
         st.write(f"ပန်းတိုင်သို့ရောက်ရန် နေ့စဉ် {daily_needed:,.0f} K စုဆောင်းရန် လိုအပ်ပါသည်။")
 
 with t9:
-    st.download_button(text['export_csv'], data=data.to_csv(index=False), file_name="finance_archive.csv",
-                       mime="text/csv")
+    st.subheader("📤 Data Backup & Management")
+    
+    # ၁။ Data Export / Backup Button
+    csv = data.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="📥 Backup & Download Data (CSV)",
+        data=csv,
+        file_name='finance_backup.csv',
+        mime='text/csv',
+    )
+    
+    st.warning("အောက်ပါ Reset ခလုတ်သည် လက်ရှိ ဝင်ငွေ/ထွက်ငွေ မှတ်တမ်းများကို ဖျက်ပြီး Archive သို့ ပို့ဆောင်ပေးပါမည်။ (စုငွေ/အကြွေး မှတ်တမ်းများသာ ကျန်ရှိပါမည်။)")
+    
+    # ၂။ Trigger Reset Button
+    if st.button("⚠️ Reset Monthly Data (Trigger)"):
+        # Archive လုပ်ခြင်း
+        if os.path.exists('finance_archive.csv'):
+            data.to_csv('finance_archive.csv', mode='a', header=False, index=False)
+        else:
+            data.to_csv('finance_archive.csv', index=False)
+            
+        # စုငွေ နဲ့ အကြွေး ကို ချန်ပြီး ကျန်တာဖျက်မယ်
+        # Type ထဲတွင် Savings သို့မဟုတ် Debts ပါသော Data များကိုသာ Filter လုပ်သည်
+        df_new = data[data['Type'].isin(['Savings', 'Debts'])]
+        df_new.to_csv(FILES['db'], index=False)
+        
+        st.success("လစဉ် စာရင်းရှင်းလင်းခြင်း အောင်မြင်ပါသည်။ စနစ်အား ပြန်လည်စတင်ရန် Refresh လုပ်ပေးပါ။")
+        st.rerun()
+
+    # ၃။ AI Analysis
+    ai_ex_en = "**Analysis:**\n* Backup and data synchronization protocols are fully operational.\n* Monthly reset trigger is primed for manual maintenance cycles."
+    ai_ex_mm = "**သုံးသပ်ချက်:**\n* အချက်အလက်များအား အရန်သိမ်းဆည်းခြင်း (Backup) နှင့် လစဉ်စာရင်းရှင်းလင်းခြင်း လုပ်ဆောင်ချက်များ အဆင်သင့်ရှိပါသည်။\n* လုပ်ငန်းလည်ပတ်မှုအတွက် လိုအပ်ပါက Trigger ခလုတ်ကို အသုံးပြု၍ စာရင်းများအား ရှင်းလင်းနိုင်ပါသည်။"
+    render_ai_box(text['analysis_title'], ai_ex_en, ai_ex_mm)
