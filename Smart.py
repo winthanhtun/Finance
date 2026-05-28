@@ -635,7 +635,8 @@ with t3:
 with t4:
     st.subheader("📊 ဝင်ငွေ/ထွက်ငွေ နှိုင်းယှဉ်ချက် (Area Chart)")
     
-    if not data.empty:
+    st.write("--- စစ်ဆေးရန် (Debugging) ---")
+    st.write(data['Type'].unique()) # ဒါက Database ထဲက Type တွေကို အကုန်ပြပေးလိမ့်မယ်    if not data.empty:
         # 1. Data ပြင်ဆင်ခြင်း
         df_plot = data.copy()
         df_plot['Date'] = pd.to_datetime(df_plot['Date'])
