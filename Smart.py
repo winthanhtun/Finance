@@ -244,7 +244,7 @@ if not st.session_state["logged_in"]:
 # --- 3. DATABASE FILES ---
 FILES = {
     'db': "database.csv", 'budget': "budget.csv", 'savings': "savings.csv",
-    'debt': "debt.csv", 'rec': "recurring.csv"
+    'debt': "debt.csv", 'rec': "recurring.csv",'debt_cats': 'debt_categories.csv'
 }
 if not os.path.exists("receipts"): os.makedirs("receipts")
 
