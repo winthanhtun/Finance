@@ -649,24 +649,17 @@ with t4:
             x="Date", 
             y="Amount", 
             color="Type",
-            color_discrete_map={text['inc_opt']: '#2ECC71', text['exp_opt']: '#E74C3C'},
             template="plotly_dark"
         )
         
-        fig_area.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)', 
-            plot_bgcolor='rgba(0,0,0,0)',
-            hovermode="x unified",
-            margin=dict(l=0, r=0, t=30, b=0)
-        )
+        fig_area.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', hovermode="x unified")
         st.plotly_chart(fig_area, use_container_width=True)
         
-        # 3. AI Analysis
-        total_inc = daily_flow[daily_flow['Type'] == text['inc_opt']]['Amount'].sum()
-        total_exp = daily_flow[daily_flow['Type'] == text['exp_opt']]['Amount'].sum()
-        net = total_inc - total_exp
-        
-        st.info(f"**Analysis:** စုစုပေါင်း ဝင်ငွေ: {total_inc:,.0f} K | စုစုပေါင်း ထွက်ငွေ: {total_exp:,.0f} K | လက်ကျန်: {net:,.0f} K")
+        # 3. AI Analysis (စာသားကို မစစ်တော့ဘဲ ရှိသမျှ Type တွေကို အကုန်ပေါင်းပြမယ်)
+        st.write("---")
+        for type_name in daily_flow['Type'].unique():
+            total = daily_flow[daily_flow['Type'] == type_name]['Amount'].sum()
+            st.info(f"**{type_name}:** {total:,.0f} K")
     else:
         st.warning("ပြသရန် Data မရှိသေးပါ။")
 
