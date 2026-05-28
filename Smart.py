@@ -635,8 +635,7 @@ with t3:
 with t4:
     st.subheader("📊 ဝင်ငွေ/ထွက်ငွေ နှိုင်းယှဉ်ချက် (Area Chart)")
     
-    st.write("--- စစ်ဆေးရန် (Debugging) ---")
-    st.write(data['Type'].unique()) # ဒါက Database ထဲက Type တွေကို အကုန်ပြပေးလိမ့်မယ်    if not data.empty:
+    if not data.empty:
         # 1. Data ပြင်ဆင်ခြင်း
         df_plot = data.copy()
         df_plot['Date'] = pd.to_datetime(df_plot['Date'])
@@ -651,25 +650,23 @@ with t4:
             y="Amount", 
             color="Type",
             color_discrete_map={text['inc_opt']: '#2ECC71', text['exp_opt']: '#E74C3C'},
-            template="plotly_dark",
-            title="နေ့စဉ် ငွေကြေးစီးဆင်းမှု (Financial Flow)"
+            template="plotly_dark"
         )
         
-        # Chart ဒီဇိုင်းပြင်ခြင်း
         fig_area.update_layout(
             paper_bgcolor='rgba(0,0,0,0)', 
             plot_bgcolor='rgba(0,0,0,0)',
-            hovermode="x unified"
+            hovermode="x unified",
+            margin=dict(l=0, r=0, t=30, b=0)
         )
         st.plotly_chart(fig_area, use_container_width=True)
         
-        # 3. AI Analysis (အရင်အတိုင်း)
+        # 3. AI Analysis
         total_inc = daily_flow[daily_flow['Type'] == text['inc_opt']]['Amount'].sum()
         total_exp = daily_flow[daily_flow['Type'] == text['exp_opt']]['Amount'].sum()
         net = total_inc - total_exp
         
-        ai_msg = f"**Analysis:** စုစုပေါင်း ဝင်ငွေ: {total_inc:,.0f} K | စုစုပေါင်း ထွက်ငွေ: {total_exp:,.0f} K | လက်ကျန်: {net:,.0f} K"
-        st.info(ai_msg)
+        st.info(f"**Analysis:** စုစုပေါင်း ဝင်ငွေ: {total_inc:,.0f} K | စုစုပေါင်း ထွက်ငွေ: {total_exp:,.0f} K | လက်ကျန်: {net:,.0f} K")
     else:
         st.warning("ပြသရန် Data မရှိသေးပါ။")
 
