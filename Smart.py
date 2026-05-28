@@ -21,7 +21,7 @@ st.markdown("""
     }
     /* ခေါင်းစဉ် (subheader) တွေရဲ့ အောက်က အကွာအဝေး */
     h3 {
-        margin-top: 2px;
+        margin-top: 5px;
         margin-bottom: 1px;
     }
     /* မျဉ်းကြောင်း (divider) တွေရဲ့ အကွာအဝေး */
