@@ -540,14 +540,13 @@ with t2:
 
     st.markdown("---")
     
-    # 3. ဤနေရာမှာ New Entry နဲ့ ချိတ်ဆက်ပေးမည့် Logic (ဒီအပိုင်းကို အစားထိုးပါ)
+   # 3. ဤနေရာမှာ New Entry နဲ့ ချိတ်ဆက်ပေးမည့် Logic
     for _, r in edited_s.iterrows():
         goal_name = r['Goal']
         target_val = r['Target']
         
-        # [အရေးကြီး] ဒီမှာ r['Saved'] ကို မသုံးတော့ဘဲ 'data' ထဲက Expense တွေကိုပဲ ပေါင်းမယ်
-        # ဒါမှ 2 ဆ ဖြစ်မနေမှာပါ
-        total_current = data[(data['Type'] == "Expense (ထွက်ငွေ)") & 
+        # [အရေးကြီး] "Expense (ထွက်ငွေ)" ဆိုတဲ့ စာသားအစား text['exp_opt'] ကို သုံးပါမယ်
+        total_current = data[(data['Type'] == text['exp_opt']) & 
                              (data['Category'] == goal_name)]['Amount'].sum()
         
         st.write(f"### {goal_name}")
