@@ -12,7 +12,7 @@ st.markdown("""
     <style>
     /* အပေါ်အောက် အကွာအဝေးကို လျှော့ချရန် */
     .block-container {
-        padding-top: 1rem;
+        padding-top: 2rem;
         padding-bottom: 1rem;
     }
     /* Metric တွေရဲ့ အောက်က အကွာအဝေး */
@@ -21,13 +21,13 @@ st.markdown("""
     }
     /* ခေါင်းစဉ် (subheader) တွေရဲ့ အောက်က အကွာအဝေး */
     h3 {
-        margin-top: 0px;
-        margin-bottom: 5px;
+        margin-top: 2px;
+        margin-bottom: 1px;
     }
     /* မျဉ်းကြောင်း (divider) တွေရဲ့ အကွာအဝေး */
     hr {
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin-top: 1px;
+        margin-bottom: 1px;
     }
     </style>
     """, unsafe_allow_html=True)
