@@ -30,8 +30,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# ကိုကို့မှာ ရှိပြီးသား Title (ဒီတစ်နေရာပဲ ရှိပါစေ)
-st.title("ဝင်ငွေ/ထွက်ငွေ စာရင်းရှင်းတမ်း")
 # --- MULTILINGUAL DICTIONARY (Translation Data) ---
 LANG_DICT = {
     "English": {
