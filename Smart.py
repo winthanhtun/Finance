@@ -672,26 +672,55 @@ with t4:
         st.warning("ပြသရန် Data မရှိသေးပါ။")
 
 with t5:
+    st.subheader("💳 " + text['methods_used']) # Header လေးတော့ ထည့်ပေးထားတယ်
     if not data.empty:
-        fig_p = px.pie(data, values="Amount", names="Payment Method", title=text['methods_used'],
+        fig_p = px.pie(data, values="Amount", names="Payment Method", 
                        template="plotly_dark", color_discrete_sequence=custom_colors)
 
-        # FLOATING STYLE: Payment Method Chart Background ကိုပါ Transparent လုပ်ခြင်း
+        # FLOATING STYLE
         fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_p, use_container_width=True)
 
-        # Payment Tab Split
+        # Payment Tab Analysis
         top_method = data.groupby("Payment Method")["Amount"].sum().idxmax()
         ai_p_en = f"**Analysis:**\n* Heavy terminal transaction reliance detected centered inside the **'{top_method}'** system.\n* Channel concentration risk is high if this single system experiences tech server issues.\n\n**Recommendations:**\n* Maintain secondary cash or bank backup buffers to prevent sudden transactional lockouts.\n* Audit digital wallets frequently to ensure transfer limit caps do not stall large urgent items."
-        ai_p_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိတွင် Ngweပေးချေမှု အများစုအတွက် **'{top_method}'** စနစ်တစ်ခုတည်းကိုသာ အဓိက အသုံးပြုနေကြောင်း တွေ့ရပါသည်။\n* ၎င်းစနစ်တစ်ခုတည်း နည်းပညာပိုင်းဆိုင်ရာ ချို့ယွင်းချက်ဖြစ်ပေါ်ပါက လုပ်ငန်းလည်ပတ်မှု ကြန့်ကြာနိုင်သည့် စွန့်စားရမှု ရှိပါသည်။\n\n**အကြံပြုချက်များ:**\n* Ngweပေးချေမှုများ လုံးဝရပ်တန့်မသွားစေရန် အခြားဘဏ်စနစ် သို့မဟုတ် လက်ငင်းNgweသား (Cash) အရန် ထားရှိပါ။\n* အရေးကြီး လုပ်ငန်းကိစ္စများတွင် Ngweလွှဲပမာဏ ကန့်သတ်ချက် (Limits) ကြောင့် မကြန့်ကြာစေရန် ดစ်ဂျစ်တယ်ပိုက်ဆံအိတ်များကို စစ်ဆေးပါ။"
+        ai_p_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိတွင် ငွေပေးချေမှု အများစုအတွက် **'{top_method}'** စနစ်တစ်ခုတည်းကိုသာ အဓိက အသုံးပြုနေကြောင်း တွေ့ရပါသည်။\n* ၎င်းစနစ်တစ်ခုတည်း နည်းပညာပိုင်းဆိုင်ရာ ချို့ယွင်းချက်ဖြစ်ပေါ်ပါက လုပ်ငန်းလည်ပတ်မှု ကြန့်ကြာနိုင်သည့် စွန့်စားရမှု ရှိပါသည်။\n\n**အကြံပြုချက်များ:**\n* ငွေပေးချေမှုများ လုံးဝရပ်တန့်မသွားစေရန် အခြားဘဏ်စနစ် သို့မဟုတ် လက်ငင်းငွေသား (Cash) အရန် ထားရှိပါ။\n* အရေးကြီး လုပ်ငန်းကိစ္စများတွင် ငွေလွှဲပမာဏ ကန့်သတ်ချက် (Limits) ကြောင့် မကြန့်ကြာစေရန် ဒစ်ဂျစ်တယ်ပိုက်ဆံအိတ်များကို စစ်ဆေးပါ။"
     else:
-        ai_p_en = "**Analysis:**\n* Method routing matrix is completely blank with zero payment tracking vectors recorded.\n* No behavioral transactional distribution data is available for current optimization engine tasks.\n\n**Recommendations:**\n* Register proper transaction methods for all future input entries to track payment mediums.\n* Setup multiple payment routes across vetted banks to clear potential bottleneck issues."
-        ai_p_mm = "**သုံးသပ်ချက်:**\n* Ngweပေးချေမှုစနစ် မှတ်တမ်းများ မရှိသေးသည့်အတွက် သုံးစွဲမှုပုံစံ ခွဲခြမ်းစိတ်ဖြာရန် ဒေတာ မလုံလောက်သေးပါ။\n* မည်သည့် Ngweပေးချေမှုစနစ်ကို အသုံးအများဆုံးဖြစ်သည်ကို တွက်ချက်ရန် အချက်အလက် မရှိသေးပါ။\n\n**အကြံပြုချက်များ:**\n* နောင်တွင် စာရင်းသွင်းသည့်အခါ Ngweပေးချေမှုပုံစံ (ဥပမာ - Cash, KBZ Pay) များကို တိကျစွာ ရွေးချယ်ပါ။\n* Ngweပေးချေမှု လမ်းကြောင်းများ အဆင်ပြေစေရန် စိတ်ချရသော ဘဏ်စနစ် အမျိုးမျိုးကို ကြိုတင် ပြင်ဆင်ချိတ်ဆက်ထားပါ။"
+        ai_p_en = "**Analysis:**\n* Method routing matrix is completely blank with zero payment tracking vectors recorded."
+        ai_p_mm = "**သုံးသပ်ချက်:**\n* ငွေပေးချေမှုစနစ် မှတ်တမ်းများ မရှိသေးသည့်အတွက် သုံးစွဲမှုပုံစံ ခွဲခြမ်းစိတ်ဖြာရန် ဒေတာ မလုံလောက်သေးပါ။"
+    
     render_ai_box(text['analysis_title'], ai_p_en, ai_p_mm)
 
 with t6:
-    st.file_uploader(text['upload_receipt'], type=["jpg", "png", "pdf"])
+    st.subheader("🧾 " + text['upload_receipt'])
+    
+    # ၁။ Transaction Record ကို ရွေးချယ်ခိုင်းခြင်း
+    # "နေ့စွဲ - ခေါင်းစဉ် (ပမာဏ)" ပုံစံနဲ့ ပြပေးမယ်
+    options = [f"{i}: {row['Date']} | {row['Category']} ({row['Amount']} K)" for i, row in data.iterrows()]
+    selected_idx = st.selectbox("ပြေစာ ပူးတွဲမည့် စာရင်းကို ရွေးပါ", range(len(options)), format_func=lambda x: options[x])
+    
+    # ၂။ File Uploader
+    uploaded_file = st.file_uploader("ပြေစာ ပုံတင်ရန်", type=["jpg", "png", "pdf"])
+    
+    # ၃။ သိမ်းဆည်းခြင်း
+    if st.button("ပြေစာ သိမ်းဆည်းမည်"):
+        if uploaded_file is not None:
+            # receipts ဖိုင်ထဲမှာ သိမ်းမယ်
+            file_name = f"receipt_{selected_idx}.png"
+            file_path = os.path.join("receipts", file_name)
+            
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            # Database ရဲ့ Receipt Column ထဲကို File Path သွင်းပေးခြင်း
+            data.at[selected_idx, 'Receipt'] = file_path
+            data.to_csv(FILES['db'], index=False)
+            st.success("ပြေစာအား အောင်မြင်စွာ ပူးတွဲပြီးပါပြီ!")
+            st.rerun() # ပြောင်းလဲသွားတာကို ချက်ချင်းမြင်ရအောင်
+        else:
+            st.warning("ကျေးဇူးပြု၍ ပြေစာဖိုင်ကို ဦးစွာတင်ပေးပါ။")
 
+    # ၄။ ကိုကိုကြိုက်တဲ့ AI Analysis (မပြောင်းထားပါဘူး)
     ai_rc_en = "**Analysis:**\n* Document storage repository is armed and ready to index scanned image assets.\n* Digital validation layer is active to back up database entries with physical receipts.\n\n**Recommendations:**\n* Attach high-definition receipt images for all large business-related corporate costs.\n* Use this structured archive to match tax deductor compliance protocols seamlessly each season."
     ai_rc_mm = "**သုံးသပ်ချက်:**\n* ပြေစာများနှင့် စာရွက်စာတမ်းများ သိမ်းဆည်းမည့်စနစ်သည် အဆင်သင့်ဖြစ်ပြီး စနစ်တကျ အလုပ်လုပ်နေပါသည်။\n* ဒေတာဘေ့စ်ရှိ စာရင်းများကို ခိုင်မာစေရန် ဒစ်ဂျစ်တယ် ပြေစာပုံရိပ်များဖြင့် ပူးတွဲ သိမ်းဆည်းနိုင်ပြီ ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* လုပ်ငန်းနှင့် သက်ဆိုင်သော ကြီးမားသော ကုန်ကျစရိတ်များအတွက် ပြေစာပုံရိပ်များကို မပျက်မကွက် တင်ထားပါ။\n* နှစ်ချုပ် စာရင်းဇယားများနှင့် အခွန်ဆိုင်ရာ စစ်ဆေးမှုများတွင် အဆင်ပြေစေရန် ဤမှတ်တမ်းကို စနစ်တကျ အသုံးချပါ။"
     render_ai_box(text['analysis_title'], ai_rc_en, ai_rc_mm)
