@@ -8,10 +8,14 @@ import plotly.express as px
 
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance Pro", layout="wide")
+
+# ဒီနေရာမှာ ခေါင်းစဉ်ကို ထည့်ပေးမှ CSS က အလုပ်လုပ်မှာပါ
+st.title("ဝင်ငွေ/ထွက်ငွေ စာရင်းရှင်းတမ်း") 
+
 st.markdown("""
     <style>
     /* ခေါင်းစဉ် (Header) ကို အောက်နည်းနည်းရွှေ့ရန် */
-    div.stTitle {
+    h1 {
         margin-top: 30px !important;
     }
     /* အပေါ်အောက် အကွာအဝေးကို လျှော့ချရန် */
@@ -21,17 +25,17 @@ st.markdown("""
     }
     /* Metric တွေရဲ့ အောက်က အကွာအဝေး */
     [data-testid="stMetric"] {
-        margin-bottom: 0px;
+        margin-bottom: 0px !important;
     }
     /* ခေါင်းစဉ် (subheader) တွေရဲ့ အောက်က အကွာအဝေး */
     h3 {
-        margin-top: 5px;
-        margin-bottom: 1px;
+        margin-top: 5px !important;
+        margin-bottom: 1px !important;
     }
     /* မျဉ်းကြောင်း (divider) တွေရဲ့ အကွာအဝေး */
     hr {
-        margin-top: 1px;
-        margin-bottom: 1px;
+        margin-top: 1px !important;
+        margin-bottom: 1px !important;
     }
     </style>
     """, unsafe_allow_html=True)
