@@ -422,25 +422,31 @@ if not data.empty:
 
     edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
 
-    if st.button(text['save_changes']):
+   if st.button(text['save_changes']):
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
-        clean_df["Type"] = clean_df.apply(lambda x: "Income (ဝင်ငွေ)" if x["Income"] > 0 else "Expense (ထွက်ငွေ)", axis=1)
+        
+        # ၁။ Type ကို Language သဘောတရားနဲ့ အညီ ပြန်သတ်မှတ်မယ်
+        clean_df["Type"] = clean_df.apply(lambda x: text['inc_opt'] if x["Income"] > 0 else text['exp_opt'], axis=1)
+        
         final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"]]
         final_save.to_csv(FILES['db'], index=False)
         
+        # ၂။ Savings တွေကို အရင်အတိုင်း ပြန်တွက်မယ်
         if os.path.exists(FILES['savings']):
             s_df = pd.read_csv(FILES['savings'])
             s_df['Saved'] = 0 
             for index, row in s_df.iterrows():
                 goal = row['Goal']
                 total = final_save[
-                    (final_save["Type"].str.contains("Expense", case=False, na=False)) & 
+                    (final_save["Type"] == text['exp_opt']) & 
                     (final_save['Category'] == goal)
                 ]['Amount'].sum()
                 s_df.at[index, 'Saved'] = total
             s_df.to_csv(FILES['savings'], index=False)
         
+        # ၃။ ပြီးရင် st.rerun() လုပ်လိုက်တာနဲ့ 
+        # t3 (Debt Tab) က Database အသစ်ကို ပြန်ဖတ်ပြီး Progress Bar တွေကို အလိုအလျောက် ပြင်ပေးသွားပါလိမ့်မယ်။
         st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
         st.rerun()
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
