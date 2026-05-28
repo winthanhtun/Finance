@@ -571,63 +571,63 @@ with t2:
     render_ai_box(text['analysis_title'], ai_s_en, ai_s_mm)
 
 with t3:
-        st.subheader("အကြွေးစာရင်းနှင့် Progress Bar များ")
+    st.subheader("အကြွေးစာရင်းနှင့် Progress Bar များ")
+    
+    # ၁။ Category အသစ်ဖန်တီးရန်
+    with st.form("new_debt_cat_form"):
+        new_cat = st.text_input("အကြွေးစာရင်း အမည်သစ် (ဥပမာ- မေမေ, ကိုကြီး)")
+        if st.form_submit_button("Create Debt Category"):
+            if new_cat:
+                if os.path.exists(FILES['debt_cats']):
+                    cats_df = pd.read_csv(FILES['debt_cats'])
+                else:
+                    cats_df = pd.DataFrame(columns=['Category'])
+                
+                if new_cat not in cats_df['Category'].values:
+                    cats_df = pd.concat([cats_df, pd.DataFrame([new_cat], columns=['Category'])], ignore_index=True)
+                    cats_df.to_csv(FILES['debt_cats'], index=False)
+                    st.success(f"'{new_cat}' ကို အကြွေးစာရင်းထဲ ထည့်လိုက်ပါပြီ။")
+                    st.rerun()
+                else:
+                    st.warning("ဒီနာမည် ရှိပြီးသားပါ။")
+
+    # ၂။ Transaction Data မှ အကြွေးတွက်ချက်ခြင်း
+    if os.path.exists(FILES['debt_cats']) and os.path.exists(FILES['db']):
+        debt_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
         
-        # ၁။ Category အသစ်ဖန်တီးရန်
-        with st.form("new_debt_cat_form"):
-            new_cat = st.text_input("အကြွေးစာရင်း အမည်သစ် (ဥပမာ- မေမေ, ကိုကြီး)")
-            if st.form_submit_button("Create Debt Category"):
-                if new_cat:
-                    if os.path.exists(FILES['debt_cats']):
-                        cats_df = pd.read_csv(FILES['debt_cats'])
-                    else:
-                        cats_df = pd.DataFrame(columns=['Category'])
-                    
-                    if new_cat not in cats_df['Category'].values:
-                        cats_df = pd.concat([cats_df, pd.DataFrame([new_cat], columns=['Category'])], ignore_index=True)
-                        cats_df.to_csv(FILES['debt_cats'], index=False)
-                        st.success(f"'{new_cat}' ကို အကြွေးစာရင်းထဲ ထည့်လိုက်ပါပြီ။")
-                        st.rerun()
-                    else:
-                        st.warning("ဒီနာမည် ရှိပြီးသားပါ။")
+        total_net_debt = 0
+        
+        for cat in debt_list:
+            if cat in data['Category'].values:
+                cat_data = data[data['Category'] == cat]
+                
+                # Language ပေါ်မူတည်ပြီး မှန်ကန်သော Type ကို စစ်ပါမယ်
+                income = cat_data[cat_data['Type'] == text['inc_opt']]['Amount'].sum()
+                expense = cat_data[cat_data['Type'] == text['exp_opt']]['Amount'].sum()
+                
+                net_debt = income - expense
+                total_net_debt += net_debt
+                
+                st.write(f"### {cat}")
+                st.write(f"လက်ကျန်အကြွေး: {net_debt:,.0f} K")
+                progress = min(max(net_debt / 100000, 0), 1.0)
+                st.progress(progress)
+                st.divider()
 
-        # ၂။ Transaction Data မှ အကြွေးတွက်ချက်ခြင်း
-        if os.path.exists(FILES['debt_cats']) and os.path.exists(FILES['db']):
-            debt_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
-            df_db = pd.read_csv(FILES['db'])
-            
-            total_net_debt = 0 # AI အတွက် ပေါင်းထားဖို့
-            
-            for cat in debt_list:
-                if cat in df_db['Category'].values:
-                    cat_data = df_db[df_db['Category'] == cat]
-                    # Income = ချေးယူ (တိုး) / Expense = ဆပ်ငွေ (လျော့)
-                    income = cat_data[cat_data['Type'].str.contains('Income', na=False)]['Amount'].sum()
-                    expense = cat_data[cat_data['Type'].str.contains('Expense', na=False)]['Amount'].sum()
-                    net_debt = income - expense
-                    total_net_debt += net_debt
-                    
-                    st.write(f"### {cat}")
-                    st.write(f"လက်ကျန်အကြွေး: {net_debt:,.0f} K")
-                    # Progress bar (max 100000 K ကို အခြေခံထားသည်)
-                    progress = min(max(net_debt / 100000, 0), 1.0)
-                    st.progress(progress)
-                    st.divider()
-
-            # ၃။ AI Analysis အပိုင်း (အခုရလာတဲ့ total_net_debt ကို အခြေခံမည်)
-            if total_net_debt > 0:
-                ai_d_en = f"**Analysis:**\n* Total Outstanding Debt tracked: {total_net_debt:,.0f} K.\n* Your ledger shows active debt liabilities that require monitoring."
-                ai_d_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း အကြွေးကျန်မှာ {total_net_debt:,.0f} K ရှိပါသည်။\n* အကြွေးများ မထပ်အောင် စနစ်တကျ ပြန်လည်ဆပ်ရန် လိုအပ်ပါသည်။"
-            elif total_net_debt < 0:
-                ai_d_en = "**Analysis:**\n* Credit balance positive: You have overpaid or have a surplus in debt-related accounts."
-                ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးစာရင်းမှာ ပိုနေပါသည်။ ပေးရန်ရှိသည်ထက် ပိုမိုဆပ်ထားခြင်း သို့မဟုတ် လက်ကျန်ငွေ ပိုနေခြင်း ဖြစ်ပါသည်။"
-            else:
-                ai_d_en = "**Analysis:**\n* Clean debt ledger with zero outstanding negative liability entries tracked."
-                ai_d_mm = "**သုံးသပ်ချက်:**\n* ပေးရန်ရှိသော အကြွေးစာရင်း လုံးဝမရှိဘဲ သန့်ရှင်း စင်ကြယ်နေသည်ကို တွေ့ရှိရပါသည်။"
-            
-            render_ai_box(text['analysis_title'], ai_d_en, ai_d_mm)
+        # ၃။ AI Analysis
+        if total_net_debt > 0:
+            ai_d_en = f"**Analysis:**\n* Total Outstanding Debt tracked: {total_net_debt:,.0f} K."
+            ai_d_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း အကြွေးကျန်မှာ {total_net_debt:,.0f} K ရှိပါသည်။"
+        elif total_net_debt < 0:
+            ai_d_en = "**Analysis:**\n* Credit balance positive."
+            ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးစာရင်းမှာ ပိုနေပါသည်။"
         else:
-            st.info("အကြွေးစာရင်း သို့မဟုတ် Transaction Data မရှိသေးပါ။")
+            ai_d_en = "**Analysis:**\n* Clean debt ledger."
+            ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးစာရင်း မျှတပါသည်။"
+        
+        render_ai_box(text['analysis_title'], ai_d_en, ai_d_mm)
+    else:
+        st.info("အကြွေးစာရင်း သို့မဟုတ် Transaction Data မရှိသေးပါ။")
 
 with t4:
     if not data.empty:
