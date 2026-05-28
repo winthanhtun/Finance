@@ -633,17 +633,44 @@ with t3:
         st.info("အကြွေးစာရင်း သို့မဟုတ် Transaction Data မရှိသေးပါ။")
 
 with t4:
+    st.subheader("📊 ဝင်ငွေ/ထွက်ငွေ နှိုင်းယှဉ်ချက် (Area Chart)")
+    
     if not data.empty:
-        fig_c = px.bar(data, x="Date", y="Amount", color="Type", barmode="group", template="plotly_dark")
-        fig_c.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig_c, use_container_width=True)
-
-        ai_c_en = f"**Analysis:**\n* Inflow vs outflow delta tracks clear structural spending behaviors over time.\n* Income and expense vectors are properly charted for macro baseline evaluations.\n\n**Recommendations:**\n* Maintain a minimum 30% positive green spread gap across every active tracking cycle.\n* If the gap narrows, immediately depress variable costs before fixed structures get pressured."
-        ai_c_mm = f"**သုံးသပ်ချက်:**\n* ဝင်ငွေနှင့် ထွက်ငွေ နှိုင်းယှဉ်ချက် ပြဇယားအရ Ngweကြေး သုံးစွဲမှုပုံစံ အနိမ့်အမြင့်ကို ရှင်းလင်းစွာ မြင်တွေ့နိုင်ပြီ ဖြစ်ပါသည်။\n* ရေရှည် ဘဏ္ဍာရေး စီမံခန့်ခွဲမှု ဆန်းစစ်ရန်အတွက် ဒေတာများကို ကောင်းမွန်စွာ စနစ်တကျ ဖော်ပြထားပါသည်။\n\n**အကြံပြုချက်များ:**\n* ပုံမှန် စက်ဝန်းတစ်ခုစီတိုင်းတွင် ဝင်ငွေသည် ထွက်ငွေထက် အနည်းဆုံး ၃၀% ပိုများသော အပေါင်းလက္ခဏာဆောင်သည့် ကွာဟချက်ကို ထိန်းသိမ်းပါ။\n* အဆိုပါ ကွာဟချက် ကျဉ်းမြောင်းလာပါက ပုံသေစရိတ်များကို မထိခိုက်စေဘဲ သာမန်အသုံးစရိတ်များကို ချက်ချင်း လျှော့ချပါ။"
+        # 1. Data ပြင်ဆင်ခြင်း
+        df_plot = data.copy()
+        df_plot['Date'] = pd.to_datetime(df_plot['Date'])
+        
+        # နေ့အလိုက် ဝင်ငွေ/ထွက်ငွေ ပေါင်းခြင်း
+        daily_flow = df_plot.groupby(['Date', 'Type'])['Amount'].sum().reset_index()
+        
+        # 2. Area Chart ဆွဲခြင်း
+        fig_area = px.area(
+            daily_flow, 
+            x="Date", 
+            y="Amount", 
+            color="Type",
+            color_discrete_map={text['inc_opt']: '#2ECC71', text['exp_opt']: '#E74C3C'},
+            template="plotly_dark",
+            title="နေ့စဉ် ငွေကြေးစီးဆင်းမှု (Financial Flow)"
+        )
+        
+        # Chart ဒီဇိုင်းပြင်ခြင်း
+        fig_area.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)',
+            hovermode="x unified"
+        )
+        st.plotly_chart(fig_area, use_container_width=True)
+        
+        # 3. AI Analysis (အရင်အတိုင်း)
+        total_inc = daily_flow[daily_flow['Type'] == text['inc_opt']]['Amount'].sum()
+        total_exp = daily_flow[daily_flow['Type'] == text['exp_opt']]['Amount'].sum()
+        net = total_inc - total_exp
+        
+        ai_msg = f"**Analysis:** စုစုပေါင်း ဝင်ငွေ: {total_inc:,.0f} K | စုစုပေါင်း ထွက်ငွေ: {total_exp:,.0f} K | လက်ကျန်: {net:,.0f} K"
+        st.info(ai_msg)
     else:
-        ai_c_en = "**Analysis:**\n* Comparative visualization streams are empty due to lack of baseline raw points.\n* System is awaiting numerical signals to construct statistical delta graphs.\n\n**Recommendations:**\n* Log incoming transactions regularly to form the foundation of historical analysis.\n* Ensure data points span consecutive intervals to unlock deeper predictive trending modules."
-        ai_c_mm = "**သုံးသပ်ချက်:**\n* စနစ်ထဲတွင် ဒေတာအချက်အလက် မရှိသေးသည့်အတွက် နှိုင်းယှဉ်ချက် ပြဇယားများ မဖော်ပြနိုင်သေးပါ။\n* စာရင်းဇယားများ တွက်ချက်ဖော်ထုတ်ရန်အတွက် ဝင်ငွေ/ထွက်ငွေ ဒေတာများ ထည့်သွင်းရန် စောင့်ဆိုင်းနေပါသည်။\n\n**အကြံပြုချက်များ:**\n* သမိုင်းကြောင်းဆိုင်ရာ ခွဲခြမ်းစိတ်ဖြာမှု အခြေခံကောင်းများ ရရှိရန် နေ့စဉ် စာရင်းများကို ပုံမှန် ထည့်သွင်းပါ။\n* တိကျသော ခန့်မှန်းချက်များနှင့် သုံးသပ်ချက်များ ရရှိရန် ဒေတာများကို ကြားဖြတ်မပြတ်ဘဲ စဉ်ဆက်မပြတ် ထည့်သွင်းပေးပါ။"
-    render_ai_box(text['analysis_title'], ai_c_en, ai_c_mm)
+        st.warning("ပြသရန် Data မရှိသေးပါ။")
 
 with t5:
     if not data.empty:
