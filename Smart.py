@@ -6,39 +6,32 @@ import os
 import uuid
 import plotly.express as px
 
+
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance Pro", layout="wide")
 
-# ဒီနေရာမှာ ခေါင်းစဉ်ကို ထည့်ပေးမှ CSS က အလုပ်လုပ်မှာပါ
-st.title("ဝင်ငွေ/ထွက်ငွေ စာရင်းရှင်းတမ်း") 
-
 st.markdown("""
     <style>
-    /* ခေါင်းစဉ် (Header) ကို အောက်နည်းနည်းရွှေ့ရန် */
-    h1 {
-        margin-top: 30px !important;
-    }
-    /* အပေါ်အောက် အကွာအဝေးကို လျှော့ချရန် */
+    /* Page တစ်ခုလုံးရဲ့ အပေါ်ပိုင်းကိုပဲ ချိန်ညှိမယ် */
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem; /* ဒီဂဏန်းကို တိုးရင် ခေါင်းစဉ်က အောက်ကို ရွေ့လာမယ် */
         padding-bottom: 1rem;
     }
-    /* Metric တွေရဲ့ အောက်က အကွာအဝေး */
-    [data-testid="stMetric"] {
-        margin-bottom: 0px !important;
+    
+    /* Header (Title) ကိုပဲ သီးသန့် အောက်ရွှေ့ချင်ရင် */
+    h1 {
+        margin-top: 20px !important; /* ဒီမှာ 20px သို့မဟုတ် 40px စမ်းကြည့်ပါ */
     }
-    /* ခေါင်းစဉ် (subheader) တွေရဲ့ အောက်က အကွာအဝေး */
-    h3 {
-        margin-top: 5px !important;
-        margin-bottom: 1px !important;
-    }
-    /* မျဉ်းကြောင်း (divider) တွေရဲ့ အကွာအဝေး */
-    hr {
-        margin-top: 1px !important;
-        margin-bottom: 1px !important;
-    }
+
+    /* ကျန်တဲ့ Metric, Subheader, Divider တွေအတွက် */
+    [data-testid="stMetric"] { margin-bottom: 0px !important; }
+    h3 { margin-top: 5px !important; margin-bottom: 1px !important; }
+    hr { margin-top: 1px !important; margin-bottom: 1px !important; }
     </style>
     """, unsafe_allow_html=True)
+
+# ကိုကို့မှာ ရှိပြီးသား Title (ဒီတစ်နေရာပဲ ရှိပါစေ)
+st.title("ဝင်ငွေ/ထွက်ငွေ စာရင်းရှင်းတမ်း")
 # --- MULTILINGUAL DICTIONARY (Translation Data) ---
 LANG_DICT = {
     "English": {
