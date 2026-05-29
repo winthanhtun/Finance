@@ -302,55 +302,50 @@ st.sidebar.markdown(f"<h2 style='color:#64FFDA; margin-top:5px;'>{text['new_entr
 
 # 1. Inputs
 d_in = st.sidebar.date_input(text['date'], date.today())
-# 1. Selectbox ယူခြင်း
-    t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
+# 1. Selectbox ယူခြင်း (Space အရှေ့မှာ မပါရပါ)
+t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
     
-    # [ပြင်ဆင်ချက်] မြန်မာလိုရွေးပေမယ့် Data ထဲမှာတော့ English (Income/Expense) ပဲ သိမ်းမယ်
-    type_to_save = "Income" if t_in == text['inc_opt'] else "Expense"
+# Mapping
+type_to_save = "Income" if t_in == text['inc_opt'] else "Expense"
 
-    # Debt Category ဖတ်ခြင်း
-    if os.path.exists(FILES['debt_cats']):
-        debt_cats_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
-    else:
-        debt_cats_list = []
+# Debt Category
+if os.path.exists(FILES['debt_cats']):
+    debt_cats_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
+else:
+    debt_cats_list = []
 
-    budget_categories = b_df['Category'].tolist() + debt_cats_list + ["အခြား"] 
-    c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
+budget_categories = b_df['Category'].tolist() + debt_cats_list + ["အခြား"] 
+c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
 
-    c_in = c_select
-    if c_select == "အခြား":
-        c_in = st.sidebar.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ")
+c_in = c_select
+if c_select == "အခြား":
+    c_in = st.sidebar.text_input("အခြား ခေါင်းစဉ်ရိုက်ပါ")
 
-    a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
-    p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
+a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
+p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 
-    # 2. Submit Button
-    if st.sidebar.button(text['add_rec_btn']):
-        if c_in and a_in > 0:
-            # [ပြင်ဆင်ချက်] Type နေရာမှာ [type_to_save] ကိုသုံးလိုက်ပါပြီ
-            new_row = pd.DataFrame({
-                'Date': [d_in], 
-                'Type': [type_to_save], 
-                'Category': [c_in], 
-                'Amount': [a_in], 
-                'Payment Method': [p_in], 
-                'Receipt': [""]
-            })
+# 2. Submit Button
+if st.sidebar.button(text['add_rec_btn']):
+    if c_in and a_in > 0:
+        new_row = pd.DataFrame({
+            'Date': [d_in], 
+            'Type': [type_to_save], 
+            'Category': [c_in], 
+            'Amount': [a_in], 
+            'Payment Method': [p_in], 
+            'Receipt': [""]
+        })
             
-            # Data ကို CSV ထဲထည့်မယ်
-            data = pd.concat([data, new_row], ignore_index=True)
-            data.to_csv(FILES['db'], index=False)
+        data = pd.concat([data, new_row], ignore_index=True)
+        data.to_csv(FILES['db'], index=False)
             
-            # Savings တွက်ချက်ခြင်း
-            if c_in in s_df['Goal'].values:
-                s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
-                s_df.to_csv(FILES['savings'], index=False)
+        if c_in in s_df['Goal'].values:
+            s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
+            s_df.to_csv(FILES['savings'], index=False)
                 
-            # [အရေးကြီးဆုံး] Cache ရှင်းပြီး Refresh လုပ်ပေးခြင်း (ဒါမှ Data အသစ် ချက်ချင်းပေါ်မှာပါ)
-            st.cache_data.clear()
-            st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
-            st.rerun()
-
+        st.cache_data.clear()
+        st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
+        st.rerun()
 st.sidebar.markdown("---")
 st.sidebar.subheader(text['budget_prog'])
 for _, r in b_df.iterrows():
