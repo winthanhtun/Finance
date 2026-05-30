@@ -400,29 +400,49 @@ col2.metric(text['total_exp'], f"{te:,.0f} K")
 col3.metric(text['net_bal'], f"{(ti - te):,.0f} K")
 st.divider() 
 
-# 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း
+# 6. EXCEL STYLE TABLE - ဇယားကို ပြန်ပြင်ခြင်း (Remark ကော်လံပါဝင်အောင် ပြင်ဆင်ပြီး)
 st.subheader(text['tx_records']) 
 if not data.empty:
     df_v = data.copy()
+    
+    # Income နှင့် Expense ကို တွက်ချက်ခြင်း
     df_v["Income"] = df_v.apply(lambda x: x["Amount"] if "Income" in str(x["Type"]) else 0, axis=1)
     df_v["Expense"] = df_v.apply(lambda x: x["Amount"] if "Expense" in str(x["Type"]) else 0, axis=1)
 
-    total_row = pd.DataFrame([{"Date": "TOTAL", "Type": "", "Category": "", "Income": df_v["Income"].sum(),
-                               "Expense": df_v["Expense"].sum(), "Payment Method": "", "Receipt": ""}])
+    # TOTAL တန်းအတွက် Data
+    total_row = pd.DataFrame([{
+        "Date": "TOTAL", "Type": "", "Category": "", 
+        "Income": df_v["Income"].sum(), "Expense": df_v["Expense"].sum(), 
+        "Payment Method": "", "Remark": "", "Receipt": ""
+    }])
     
-    final_table = pd.concat([df_v[["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Receipt"]], total_row])
+    # ဇယားတွင်ပြမည့် ကော်လံများ
+    cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Remark", "Receipt"]
+    final_table = pd.concat([df_v[cols_to_display], total_row])
 
-    edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
+    # ဇယားကို Display လုပ်ခြင်း (Remark ပါ ရိုက်လို့ရအောင် column_config ထည့်ထားပါတယ်)
+    edited = st.data_editor(
+        final_table, 
+        use_container_width=True, 
+        num_rows="dynamic", 
+        hide_index=True,
+        column_config={
+            "Remark": st.column_config.TextColumn("Remark"),
+        }
+    )
 
     if st.button(text['save_changes']):
         # ၁။ Table ထဲက Data အသစ်တွေကို Filter လုပ်ပြီး Database ကို သိမ်းပါ
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
+        
+        # Amount ပြန်တွက်ခြင်း
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
         
-        # [ပြင်ဆင်ချက်] Type ကို Language စစ်စရာမလိုဘဲ "Income"/"Expense" အဖြစ် သတ်မှတ်ပါ
+        # Type ကို "Income"/"Expense" အဖြစ် သတ်မှတ်ပါ
         clean_df["Type"] = clean_df.apply(lambda x: "Income" if x["Income"] > 0 else "Expense", axis=1)
         
-        final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"]]
+        # Database ထဲသို့ Remark ပါဝင်အောင် သိမ်းဆည်းခြင်း
+        final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"]]
         final_save.to_csv(FILES['db'], index=False)
         
         # ၂။ Savings ဇယားကို Transaction နဲ့ Sync လုပ်ပါ
@@ -430,10 +450,8 @@ if not data.empty:
             s_df = pd.read_csv(FILES['savings'])
             s_df['Saved'] = 0 
             
-            # Transaction ဇယားထဲကနေ Savings Goal တွေနဲ့ ကိုက်ညီတာကို ပြန်ပေါင်းထည့်ပါ
             for index, row in s_df.iterrows():
                 goal = row['Goal']
-                # Category က Goal နဲ့တူပြီး Type က Income ဖြစ်မှ ပေါင်းမယ်
                 total_saved = final_save[
                     (final_save["Type"] == "Income") & 
                     (final_save['Category'] == goal)
@@ -442,7 +460,7 @@ if not data.empty:
                 
             s_df.to_csv(FILES['savings'], index=False)
         
-        st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
+        st.success("ဒေတာများနှင့် Remark မှတ်ချက်များကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ!")
         st.cache_data.clear() # Cache ရှင်းပေးရန်
         st.rerun()
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
