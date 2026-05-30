@@ -248,10 +248,18 @@ if not os.path.exists("receipts"): os.makedirs("receipts")
 
 @st.cache_data(ttl=1)
 def load_data(f, cols):
-    if not os.path.exists(f): pd.DataFrame(columns=cols).to_csv(f, index=False)
-    return pd.read_csv(f)
+    if not os.path.exists(f): 
+        pd.DataFrame(columns=cols).to_csv(f, index=False)
+    
+    df = pd.read_csv(f)
+    
+    # [အရေးကြီး] database.csv မှာ Remark ကော်လံ မရှိရင် အလိုအလျောက် ထည့်ပေးခြင်း
+    if f == FILES['db'] and 'Remark' not in df.columns:
+        df['Remark'] = ""
+        df.to_csv(f, index=False)
+    return df
 
-# အရင်ရှိတဲ့နေရာကို ဒီလို ပြင် ကော်လံတစ်ခုတိုးပြီး မှတ်ချက်ထည့်
+# Data Load လုပ်ခြင်း (အကုန်ပါသွားပါပြီ)
 data = load_data(FILES['db'], ["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"])
 b_df = load_data(FILES['budget'], ["Category", "Limit"])
 s_df = load_data(FILES['savings'], ["Goal", "Target", "Saved"])
