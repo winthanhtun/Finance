@@ -327,62 +327,55 @@ if c_select == "အခြား":
 
 a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
-
 # 2. Submit Button
-    if st.sidebar.button(text['add_rec_btn']):
-        if c_in and a_in > 0:
-            new_row = pd.DataFrame({
-                'Date': [d_in], 
-                'Type': [type_to_save], 
-                'Category': [c_in], 
-                'Amount': [a_in], 
-                'Payment Method': [p_in], 
-                'Receipt': [""]
-            })
+if st.sidebar.button(text['add_rec_btn']):
+    if c_in and a_in > 0:
+        new_row = pd.DataFrame({
+            'Date': [d_in], 
+            'Type': [type_to_save], 
+            'Category': [c_in], 
+            'Amount': [a_in], 
+            'Payment Method': [p_in], 
+            'Receipt': [""]
+        })
             
-            # Data ထည့်ခြင်း
-            data = pd.concat([data, new_row], ignore_index=True)
-            data.to_csv(FILES['db'], index=False)
+        data = pd.concat([data, new_row], ignore_index=True)
+        data.to_csv(FILES['db'], index=False)
             
-            # Savings ထဲသို့ တိုက်ရိုက်ဝင်ခြင်း
-            if c_in in s_df['Goal'].values:
-                s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
-                s_df.to_csv(FILES['savings'], index=False)
+        if c_in in s_df['Goal'].values:
+            s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
+            s_df.to_csv(FILES['savings'], index=False)
                 
-            st.cache_data.clear()
-            st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
-            st.rerun()
+        st.cache_data.clear()
+        st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
+        st.rerun()
 
-    st.sidebar.markdown("---")
-    st.sidebar.subheader(text['budget_prog'])
-    for _, r in b_df.iterrows():
-        category_name = r['Category']
-        limit_val = r['Limit']
+st.sidebar.markdown("---")
+st.sidebar.subheader(text['budget_prog'])
+for _, r in b_df.iterrows():
+    category_name = r['Category']
+    limit_val = r['Limit']
+    used = data[(data["Type"] == "Expense") & (data["Category"] == category_name)]["Amount"].sum()
         
-        # သတိပြုရန်: text['exp_opt'] ကို သုံးမယ့်အစား 'Expense' ဟု တိုက်ရိုက်စစ်ခြင်းသည် ပိုမိုမှန်ကန်ပါသည်
-        used = data[(data["Type"] == "Expense") & (data["Category"] == category_name)]["Amount"].sum()
+    st.sidebar.write(f"**{category_name}**: {used:,.0f} / {limit_val:,.0f}")
+    progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
         
-        # Progress Bar ဖော်ပြခြင်း
-        st.sidebar.write(f"**{category_name}**: {used:,.0f} / {limit_val:,.0f}")
-        
-        progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
-        
-        if progress_pct < 0.5:
-            bar_color = "#2ECC71" 
-        elif progress_pct < 0.75:
-            bar_color = "#F1C40F" 
-        else:
-            bar_color = "#E74C3C" 
+    if progress_pct < 0.5:
+        bar_color = "#2ECC71"
+    elif progress_pct < 0.75:
+        bar_color = "#F1C40F"
+    else:
+        bar_color = "#E74C3C"
 
-        st.sidebar.markdown(f"""
-            <div style="background-color: #233554; border-radius: 5px; height: 10px; width: 100%;">
-                <div style="background-color: {bar_color}; height: 10px; width: {progress_pct * 100}%; border-radius: 5px;"></div>
-            </div>
-        """, unsafe_allow_html=True)
-        st.sidebar.write("")
+    st.sidebar.markdown(f"""
+        <div style="background-color: #233554; border-radius: 5px; height: 10px; width: 100%;">
+            <div style="background-color: {bar_color}; height: 10px; width: {progress_pct * 100}%; border-radius: 5px;"></div>
+        </div>
+    """, unsafe_allow_html=True)
+    st.sidebar.write("")
         
-        if used > limit_val:
-            st.sidebar.error("⚠️ ဘတ်ဂျက်ကျော်လွန်နေပါပြီ")
+    if used > limit_val:
+        st.sidebar.error("⚠️ ဘတ်ဂျက်ကျော်လွန်နေပါပြီ")
 
 # 🎨 USER CUSTOM COLORS SETUP FOR PIE CHARTS (SIDEBAR BOTTOM)
 st.sidebar.markdown("---")
