@@ -308,13 +308,17 @@ t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 # Mapping
 type_to_save = "Income" if t_in == text['inc_opt'] else "Expense"
 
-# Debt Category
+# Debt Category များနှင့် Savings Goal များကို ပေါင်းထည့်ခြင်း
 if os.path.exists(FILES['debt_cats']):
     debt_cats_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
 else:
     debt_cats_list = []
 
-budget_categories = b_df['Category'].tolist() + debt_cats_list + ["အခြား"] 
+# Savings Goal များကိုလည်း list ထဲ ထည့်ခြင်း
+savings_goals = s_df['Goal'].tolist()
+
+# Budget + Debt + Savings + "အခြား" ကို ပေါင်းလိုက်မယ်
+budget_categories = b_df['Category'].tolist() + debt_cats_list + savings_goals + ["အခြား"] 
 c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
 
 c_in = c_select
@@ -325,60 +329,60 @@ a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
 
 # 2. Submit Button
-if st.sidebar.button(text['add_rec_btn']):
-    if c_in and a_in > 0:
-        new_row = pd.DataFrame({
-            'Date': [d_in], 
-            'Type': [type_to_save], 
-            'Category': [c_in], 
-            'Amount': [a_in], 
-            'Payment Method': [p_in], 
-            'Receipt': [""]
-        })
+    if st.sidebar.button(text['add_rec_btn']):
+        if c_in and a_in > 0:
+            new_row = pd.DataFrame({
+                'Date': [d_in], 
+                'Type': [type_to_save], 
+                'Category': [c_in], 
+                'Amount': [a_in], 
+                'Payment Method': [p_in], 
+                'Receipt': [""]
+            })
             
-        data = pd.concat([data, new_row], ignore_index=True)
-        data.to_csv(FILES['db'], index=False)
+            # Data ထည့်ခြင်း
+            data = pd.concat([data, new_row], ignore_index=True)
+            data.to_csv(FILES['db'], index=False)
             
-        if c_in in s_df['Goal'].values:
-            s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
-            s_df.to_csv(FILES['savings'], index=False)
+            # Savings ထဲသို့ တိုက်ရိုက်ဝင်ခြင်း
+            if c_in in s_df['Goal'].values:
+                s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
+                s_df.to_csv(FILES['savings'], index=False)
                 
-        st.cache_data.clear()
-        st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
-        st.rerun()
-st.sidebar.markdown("---")
-st.sidebar.subheader(text['budget_prog'])
-for _, r in b_df.iterrows():
-    category_name = r['Category']
-    limit_val = r['Limit']
-    
-    used = data[(data["Type"] == text['exp_opt']) & (data["Category"] == category_name)]["Amount"].sum()
-    
-    # Progress Bar နဲ့ အချက်အလက် ပြသခြင်း
-    st.sidebar.write(f"**{category_name}**: {used:,.0f} / {limit_val:,.0f}")
-    
-    # ရာခိုင်နှုန်းတွက်ပြီး Progress Bar ပြခြင်း
-    progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
-    
-    # ရာခိုင်နှုန်းပေါ်မူတည်ပြီး အရောင်သတ်မှတ်ခြင်း
-    if progress_pct < 0.5:
-        bar_color = "#2ECC71"  # အစိမ်း (၅၀% အောက်)
-    elif progress_pct < 0.75:
-        bar_color = "#F1C40F"  # အဝါ (၅၀% - ၇၅%)
-    else:
-        bar_color = "#E74C3C"  # အနီ (၇၅% အထက်)
+            st.cache_data.clear()
+            st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
+            st.rerun()
 
-    # HTML/CSS သုံးပြီး Progress Bar ဖန်တီးခြင်း
-    st.sidebar.markdown(f"""
-        <div style="background-color: #233554; border-radius: 5px; height: 10px; width: 100%;">
-            <div style="background-color: {bar_color}; height: 10px; width: {progress_pct * 100}%; border-radius: 5px;"></div>
-        </div>
-    """, unsafe_allow_html=True)
-    st.sidebar.write("") # အောက်ကဟာနဲ့ ကပ်မသွားအောင် နေရာချန်ပေးခြင်း
-    
-    # ဘတ်ဂျက်ကျော်ရင် သတိပေးချက်
-    if used > limit_val:
-        st.sidebar.error("⚠️ ဘတ်ဂျက်ကျော်လွန်နေပါပြီ")
+    st.sidebar.markdown("---")
+    st.sidebar.subheader(text['budget_prog'])
+    for _, r in b_df.iterrows():
+        category_name = r['Category']
+        limit_val = r['Limit']
+        
+        # သတိပြုရန်: text['exp_opt'] ကို သုံးမယ့်အစား 'Expense' ဟု တိုက်ရိုက်စစ်ခြင်းသည် ပိုမိုမှန်ကန်ပါသည်
+        used = data[(data["Type"] == "Expense") & (data["Category"] == category_name)]["Amount"].sum()
+        
+        # Progress Bar ဖော်ပြခြင်း
+        st.sidebar.write(f"**{category_name}**: {used:,.0f} / {limit_val:,.0f}")
+        
+        progress_pct = min(used / limit_val, 1.0) if limit_val > 0 else 0
+        
+        if progress_pct < 0.5:
+            bar_color = "#2ECC71" 
+        elif progress_pct < 0.75:
+            bar_color = "#F1C40F" 
+        else:
+            bar_color = "#E74C3C" 
+
+        st.sidebar.markdown(f"""
+            <div style="background-color: #233554; border-radius: 5px; height: 10px; width: 100%;">
+                <div style="background-color: {bar_color}; height: 10px; width: {progress_pct * 100}%; border-radius: 5px;"></div>
+            </div>
+        """, unsafe_allow_html=True)
+        st.sidebar.write("")
+        
+        if used > limit_val:
+            st.sidebar.error("⚠️ ဘတ်ဂျက်ကျော်လွန်နေပါပြီ")
 
 # 🎨 USER CUSTOM COLORS SETUP FOR PIE CHARTS (SIDEBAR BOTTOM)
 st.sidebar.markdown("---")
@@ -412,31 +416,35 @@ if not data.empty:
     edited = st.data_editor(final_table, use_container_width=True, num_rows="dynamic")
 
     if st.button(text['save_changes']):
+        # ၁။ Table ထဲက Data အသစ်တွေကို Filter လုပ်ပြီး Database ကို သိမ်းပါ
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
         
-        # ၁။ Type ကို Language သဘောတရားနဲ့ အညီ ပြန်သတ်မှတ်မယ်
-        clean_df["Type"] = clean_df.apply(lambda x: text['inc_opt'] if x["Income"] > 0 else text['exp_opt'], axis=1)
+        # [ပြင်ဆင်ချက်] Type ကို Language စစ်စရာမလိုဘဲ "Income"/"Expense" အဖြစ် သတ်မှတ်ပါ
+        clean_df["Type"] = clean_df.apply(lambda x: "Income" if x["Income"] > 0 else "Expense", axis=1)
         
         final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"]]
         final_save.to_csv(FILES['db'], index=False)
         
-        # ၂။ Savings တွေကို အရင်အတိုင်း ပြန်တွက်မယ်
+        # ၂။ Savings ဇယားကို Transaction နဲ့ Sync လုပ်ပါ
         if os.path.exists(FILES['savings']):
             s_df = pd.read_csv(FILES['savings'])
             s_df['Saved'] = 0 
+            
+            # Transaction ဇယားထဲကနေ Savings Goal တွေနဲ့ ကိုက်ညီတာကို ပြန်ပေါင်းထည့်ပါ
             for index, row in s_df.iterrows():
                 goal = row['Goal']
-                total = final_save[
-                    (final_save["Type"] == text['exp_opt']) & 
+                # Category က Goal နဲ့တူပြီး Type က Income ဖြစ်မှ ပေါင်းမယ်
+                total_saved = final_save[
+                    (final_save["Type"] == "Income") & 
                     (final_save['Category'] == goal)
                 ]['Amount'].sum()
-                s_df.at[index, 'Saved'] = total
+                s_df.at[index, 'Saved'] = total_saved
+                
             s_df.to_csv(FILES['savings'], index=False)
         
-        # ၃။ ပြီးရင် st.rerun() လုပ်လိုက်တာနဲ့ 
-        # t3 (Debt Tab) က Database အသစ်ကို ပြန်ဖတ်ပြီး Progress Bar တွေကို အလိုအလျောက် ပြင်ပေးသွားပါလိမ့်မယ်။
         st.success("ဒေတာများနှင့် Savings စုဆောင်းငွေများ အသစ်ပြန်တွက်ပြီးပါပြီ!")
+        st.cache_data.clear() # Cache ရှင်းပေးရန်
         st.rerun()
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
 if not data.empty:
