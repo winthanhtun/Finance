@@ -566,77 +566,72 @@ with t2:
     render_ai_box(text['analysis_title'], ai_s_en, ai_s_mm)
 
 with t3:
-    # ဘာသာစကားပေါ်မူတည်ပြီး ခေါင်းစဉ်ပြောင်းခြင်း
-    subheader_text = "📊 အကြွေးစာရင်းနှင့် Progress Bar / Debt List & Progress"
-    st.subheader(subheader_text)
+    # ခေါင်းစဉ် (Language 2 မျိုးလုံးအတွက်)
+    st.subheader("📊 အကြွေးစာရင်းနှင့် Progress Bar / Debt List & Progress")
     
-    # ၁။ Category အသစ်ဖန်တီးရန်
+    # ၁။ Category အသစ်ဖန်တီးရန် (Amount ပါ ထည့်တွက်မည်)
     with st.form("new_debt_cat_form"):
-        new_cat = st.text_input("အကြွေးစာရင်း အမည် (Debt Category Name)")
-        if st.form_submit_button("Create/Add Debt Category"):
-            if new_cat:
+        new_cat = st.text_input("အကြွေးအမည် (Debt Name)")
+        new_amount = st.number_input("မူရင်းအကြွေးပမာဏ (Total Debt Amount)", min_value=0.0)
+        if st.form_submit_button("Add Debt"):
+            if new_cat and new_amount > 0:
                 if os.path.exists(FILES['debt_cats']):
                     cats_df = pd.read_csv(FILES['debt_cats'])
                 else:
-                    cats_df = pd.DataFrame(columns=['Category'])
+                    cats_df = pd.DataFrame(columns=['Category', 'TotalAmount'])
                 
                 if new_cat not in cats_df['Category'].values:
-                    cats_df = pd.concat([cats_df, pd.DataFrame([new_cat], columns=['Category'])], ignore_index=True)
+                    new_row = pd.DataFrame([[new_cat, new_amount]], columns=['Category', 'TotalAmount'])
+                    cats_df = pd.concat([cats_df, new_row], ignore_index=True)
                     cats_df.to_csv(FILES['debt_cats'], index=False)
                     st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
                     st.rerun()
                 else:
                     st.warning("ဒီနာမည် ရှိပြီးသားပါ။")
-        # [အကြွေးစာရင်း ဖျက်ရန်]
+
+    # အကြွေးစာရင်း ဖျက်ရန်
     if os.path.exists(FILES['debt_cats']):
         cats_df = pd.read_csv(FILES['debt_cats'])
         delete_cat = st.selectbox("ဖျက်လိုသော အကြွေးစာရင်းကို ရွေးပါ", cats_df['Category'].tolist())
-        
         if st.button("ရွေးထားသော အကြွေးစာရင်းကို ဖျက်မည်"):
             cats_df = cats_df[cats_df['Category'] != delete_cat]
             cats_df.to_csv(FILES['debt_cats'], index=False)
-            st.success(f"'{delete_cat}' ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။")
+            st.success(f"'{delete_cat}' ကို ဖျက်လိုက်ပါပြီ။")
             st.rerun()
 
     # ၂။ Transaction Data မှ အကြွေးနှင့် ဆပ်ပြီးငွေ တွက်ချက်ခြင်း
     if os.path.exists(FILES['debt_cats']) and os.path.exists(FILES['db']):
-        debt_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
-        total_net_debt = 0
+        cats_df = pd.read_csv(FILES['debt_cats'])
+        total_remaining_debt = 0
         
-        for cat in debt_list:
-            # Category တူညီသော Data များကို စစ်ထုတ်ခြင်း
-            cat_data = data[data['Category'] == cat]
+        for _, row in cats_df.iterrows():
+            cat = row['Category']
+            total_debt = row['TotalAmount']
             
-            # ဝင်ငွေ (Income) = အကြွေးယူထားခြင်း (Original Debt)
-            # ထွက်ငွေ (Expense) = အကြွေးဆပ်ခြင်း (Debt Repayment)
-            income = cat_data[cat_data['Type'] == 'Income']['Amount'].sum()
-            expense = cat_data[cat_data['Type'] == 'Expense']['Amount'].sum()
+            # ဆပ်ပြီးငွေ (Expense) ကို ရှာခြင်း
+            paid = data[(data['Category'] == cat) & (data['Type'] == 'Expense')]['Amount'].sum()
+            net_debt = total_debt - paid
+            total_remaining_debt += net_debt
             
-            # လက်ကျန်အကြွေး = ယူထားတာ - ဆပ်ပြီးသား
-            net_debt = income - expense
-            total_net_debt += net_debt
-            
-            # Display (Language 2 မျိုးလုံး အဆင်ပြေအောင်)
+            # Display
             st.write(f"### 🎯 {cat}")
             col1, col2 = st.columns(2)
-            col1.write(f"**ကျန်ရှိအကြွေး (Remaining Debt):**")
-            col2.write(f"**{net_debt:,.0f} K**")
+            col1.write(f"**မူရင်းအကြွေး (Total):** {total_debt:,.0f} K")
+            col2.write(f"**ဆပ်ပြီး (Paid):** {paid:,.0f} K")
+            st.write(f"**ကျန်ရှိအကြွေး (Remaining Debt):** {net_debt:,.0f} K")
             
-            # Progress bar
-            progress = min(max(net_debt / 100000, 0), 1.0)
+            # Progress Bar (ဆပ်ပြီးငွေ / မူရင်းအကြွေး)
+            progress = min(max(paid / total_debt, 0), 1.0) if total_debt > 0 else 0
             st.progress(progress)
             st.divider()
 
         # ၃။ AI Analysis
-        if total_net_debt > 0:
-            ai_d_en = f"**Analysis:**\n* Total Outstanding Debt tracked: {total_net_debt:,.0f} K."
-            ai_d_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း အကြွေးကျန်မှာ {total_net_debt:,.0f} K ရှိပါသည်။"
-        elif total_net_debt < 0:
-            ai_d_en = "**Analysis:**\n* Credit balance positive (Overpaid)."
-            ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးထက် ပိုဆပ်ထားပါသည်။"
+        if total_remaining_debt > 0:
+            ai_d_en = f"**Analysis:**\n* Total Outstanding Debt tracked: {total_remaining_debt:,.0f} K."
+            ai_d_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း အကြွေးကျန်မှာ {total_remaining_debt:,.0f} K ရှိပါသည်။"
         else:
-            ai_d_en = "**Analysis:**\n* Clean debt ledger."
-            ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးစာရင်း မျှတပါသည်။"
+            ai_d_en = "**Analysis:**\n* Clean debt ledger (No debt outstanding)."
+            ai_d_mm = "**သုံးသပ်ချက်:**\n* အကြွေးကျန် မရှိတော့ပါ။"
         
         render_ai_box(text['analysis_title'], ai_d_en, ai_d_mm)
     else:
