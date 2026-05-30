@@ -584,8 +584,7 @@ with t3:
                     st.rerun()
                 else:
                     st.warning("ဒီနာမည် ရှိပြီးသားပါ။")
-
-    # ၂။ Transaction Data မှ အကြွေးတွက်ချက်ခြင်း
+    # ၂။ Transaction Data မှ အကြွေးတွက်ချက်ခြင်း (ပြင်ဆင်ပြီး)
     if os.path.exists(FILES['debt_cats']) and os.path.exists(FILES['db']):
         debt_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
         
@@ -595,21 +594,21 @@ with t3:
             if cat in data['Category'].values:
                 cat_data = data[data['Category'] == cat]
                 
-                # Language ပေါ်မူတည်ပြီး မှန်ကန်သော Type ကို စစ်ပါမယ်
-                income = cat_data[cat_data['Type'] == text['inc_opt']]['Amount'].sum()
-                expense = cat_data[cat_data['Type'] == text['exp_opt']]['Amount'].sum()
+                # အရေးကြီး: Language မရွေးဘဲ 'Income'/'Expense' နဲ့ပဲ စစ်မယ်
+                income = cat_data[cat_data['Type'] == 'Income']['Amount'].sum()
+                expense = cat_data[cat_data['Type'] == 'Expense']['Amount'].sum()
                 
                 net_debt = income - expense
                 total_net_debt += net_debt
                 
                 st.write(f"### {cat}")
                 st.write(f"လက်ကျန်အကြွေး: {net_debt:,.0f} K")
-                # Progress bar (max 100000 K ကို အခြေခံထားသည်)
+                
                 progress = min(max(net_debt / 100000, 0), 1.0)
                 st.progress(progress)
                 st.divider()
 
-        # ၃။ AI Analysis
+        # ၃။ AI Analysis (ဒါက အကြွေးတွက်တဲ့ for loop အောက်မှာ ရှိနေရမယ်)
         if total_net_debt > 0:
             ai_d_en = f"**Analysis:**\n* Total Outstanding Debt tracked: {total_net_debt:,.0f} K."
             ai_d_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း အကြွေးကျန်မှာ {total_net_debt:,.0f} K ရှိပါသည်။"
