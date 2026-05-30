@@ -308,17 +308,17 @@ t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 # Mapping
 type_to_save = "Income" if t_in == text['inc_opt'] else "Expense"
 
+# --- 4. SIDEBAR INPUTS (Updated) ---
 # Debt Category များနှင့် Savings Goal များကို ပေါင်းထည့်ခြင်း
 if os.path.exists(FILES['debt_cats']):
     debt_cats_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
 else:
     debt_cats_list = []
 
-# Savings Goal များကိုလည်း list ထဲ ထည့်ခြင်း
 savings_goals = s_df['Goal'].tolist()
 
-# Budget + Debt + Savings + "အခြား" ကို ပေါင်းလိုက်မယ်
-budget_categories = b_df['Category'].tolist() + debt_cats_list + savings_goals + ["အခြား"] 
+# [ပြင်ဆင်ချက်] set() ကိုသုံးပြီး ထပ်နေသော Category များကို ဖယ်ထုတ်၍ ပေါင်းခြင်း
+budget_categories = list(set(b_df['Category'].tolist() + debt_cats_list + savings_goals + ["အခြား"]))
 c_select = st.sidebar.selectbox(text['cat_input'], budget_categories)
 
 c_in = c_select
@@ -327,6 +327,7 @@ if c_select == "အခြား":
 
 a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
+
 # 2. Submit Button
 if st.sidebar.button(text['add_rec_btn']):
     if c_in and a_in > 0:
@@ -339,13 +340,18 @@ if st.sidebar.button(text['add_rec_btn']):
             'Receipt': [""]
         })
             
+        # Data ထည့်ခြင်း
         data = pd.concat([data, new_row], ignore_index=True)
         data.to_csv(FILES['db'], index=False)
             
+        # Savings ထဲသို့ တိုက်ရိုက်ဝင်ခြင်း
         if c_in in s_df['Goal'].values:
             s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
             s_df.to_csv(FILES['savings'], index=False)
                 
+        # Debt Tab အတွက် အထူးပြင်ဆင်ချက် မလိုပါ (Logic က Expense ကိုပဲ နှုတ်မှာဖြစ်လို့)
+        # အကြွေးဆပ်ရန် ထွက်ငွေအဖြစ် ထည့်လိုက်ရုံဖြင့် t3 က တွက်ချက်ပေးသွားပါမည်
+            
         st.cache_data.clear()
         st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
         st.rerun()
