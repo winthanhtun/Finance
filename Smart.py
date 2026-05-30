@@ -251,7 +251,8 @@ def load_data(f, cols):
     if not os.path.exists(f): pd.DataFrame(columns=cols).to_csv(f, index=False)
     return pd.read_csv(f)
 
-data = load_data(FILES['db'], ["Date", "Type", "Category", "Amount", "Payment Method", "Receipt"])
+# အရင်ရှိတဲ့နေရာကို ဒီလို ပြင် ကော်လံတစ်ခုတိုးပြီး မှတ်ချက်ထည့်
+data = load_data(FILES['db'], ["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"])
 b_df = load_data(FILES['budget'], ["Category", "Limit"])
 s_df = load_data(FILES['savings'], ["Goal", "Target", "Saved"])
 d_df = load_data(FILES['debt'], ["Name", "Type", "Amount"])
@@ -308,7 +309,7 @@ t_in = st.sidebar.selectbox(text['type'], [text['inc_opt'], text['exp_opt']])
 # Mapping
 type_to_save = "Income" if t_in == text['inc_opt'] else "Expense"
 
-# --- 4. SIDEBAR INPUTS (Updated) ---
+# --- 4. SIDEBAR INPUTS (Updated with Remark) ---
 # Debt Category များနှင့် Savings Goal များကို ပေါင်းထည့်ခြင်း
 if os.path.exists(FILES['debt_cats']):
     debt_cats_list = pd.read_csv(FILES['debt_cats'])['Category'].tolist()
@@ -327,6 +328,7 @@ if c_select == "အခြား":
 
 a_in = st.sidebar.number_input(text['amount'], min_value=0.0)
 p_in = st.sidebar.selectbox(text['method'], ["Cash", "KBZ Pay", "Wave", "Bank"])
+r_in = st.sidebar.text_input("မှတ်ချက် (Remark)") # Remark input ထည့်ပေးလိုက်ပြီနော်
 
 # 2. Submit Button
 if st.sidebar.button(text['add_rec_btn']):
@@ -337,7 +339,8 @@ if st.sidebar.button(text['add_rec_btn']):
             'Category': [c_in], 
             'Amount': [a_in], 
             'Payment Method': [p_in], 
-            'Receipt': [""]
+            'Receipt': [""],
+            'Remark': [r_in] # Remark ကိုပါ ထည့်ပေးလိုက်ပြီ
         })
             
         # Data ထည့်ခြင်း
@@ -348,9 +351,6 @@ if st.sidebar.button(text['add_rec_btn']):
         if c_in in s_df['Goal'].values:
             s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
             s_df.to_csv(FILES['savings'], index=False)
-                
-        # Debt Tab အတွက် အထူးပြင်ဆင်ချက် မလိုပါ (Logic က Expense ကိုပဲ နှုတ်မှာဖြစ်လို့)
-        # အကြွေးဆပ်ရန် ထွက်ငွေအဖြစ် ထည့်လိုက်ရုံဖြင့် t3 က တွက်ချက်ပေးသွားပါမည်
             
         st.cache_data.clear()
         st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
