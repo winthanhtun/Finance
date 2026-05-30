@@ -587,6 +587,16 @@ with t3:
                     st.rerun()
                 else:
                     st.warning("ဒီနာမည် ရှိပြီးသားပါ။")
+        # [အကြွေးစာရင်း ဖျက်ရန်]
+    if os.path.exists(FILES['debt_cats']):
+        cats_df = pd.read_csv(FILES['debt_cats'])
+        delete_cat = st.selectbox("ဖျက်လိုသော အကြွေးစာရင်းကို ရွေးပါ", cats_df['Category'].tolist())
+        
+        if st.button("ရွေးထားသော အကြွေးစာရင်းကို ဖျက်မည်"):
+            cats_df = cats_df[cats_df['Category'] != delete_cat]
+            cats_df.to_csv(FILES['debt_cats'], index=False)
+            st.success(f"'{delete_cat}' ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။")
+            st.rerun()
 
     # ၂။ Transaction Data မှ အကြွေးနှင့် ဆပ်ပြီးငွေ တွက်ချက်ခြင်း
     if os.path.exists(FILES['debt_cats']) and os.path.exists(FILES['db']):
