@@ -4,14 +4,6 @@ import pandas as pd
 from datetime import date, datetime
 import os
 import plotly.express as px
-
-# App ရဲ့ အပေါ်ဆုံးမှာ လမ်းကြောင်းကို ပေါ်လာအောင် လုပ်တာပါ
-st.sidebar.write("### App အလုပ်လုပ်နေတဲ့ Folder")
-st.sidebar.code(os.getcwd())
-
-# ဖိုင်စာရင်းကိုလည်း sidebar မှာပဲ ပေါ်လာအောင် လုပ်တာပါ
-st.sidebar.write("### ဒီ Folder ထဲက ဖိုင်များ")
-st.sidebar.write(os.listdir())
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance", layout="wide")
 
