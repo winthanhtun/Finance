@@ -440,9 +440,6 @@ if not data.empty:
             "Receipt": st.column_config.TextColumn("ပြေစာဖိုင်")
         }
     )
-
-    # ဇယားအောက်မှာ Download ခလုတ်လေးတွေ စီပေးမယ်
-    st.markdown("---")
     
     if st.button(text['save_changes']):
         # ၁။ Table ထဲက Data အသစ်တွေကို Filter လုပ်ပြီး Database ကို သိမ်းပါ
