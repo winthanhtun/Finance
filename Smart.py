@@ -5,7 +5,7 @@ from datetime import date, datetime
 import os
 import plotly.express as px
 
-
+st.write("App လက်ရှိ Run နေတဲ့နေရာ:", os.getcwd())
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance", layout="wide")
 
