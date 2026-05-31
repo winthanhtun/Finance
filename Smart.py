@@ -5,7 +5,13 @@ from datetime import date, datetime
 import os
 import plotly.express as px
 
-st.write("App လက်ရှိ Run နေတဲ့နေရာ:", os.getcwd())
+# ဖိုင်လမ်းကြောင်းအမှန်ကို ရှာပေးမယ့် Code
+current_working_directory = os.getcwd()
+st.error(f"App လက်ရှိအလုပ်လုပ်နေတဲ့ Folder လမ်းကြောင်း: {current_working_directory}")
+
+# အဲ့ဒီ Folder ထဲမှာ ဘာတွေရှိလဲဆိုတာ စာရင်းပြမယ်
+files_in_folder = os.listdir(current_working_directory)
+st.warning(f"ဒီ Folder ထဲမှာ ရှိနေတဲ့ဖိုင်များ: {files_in_folder}")
 # --- 1. PAGE SETUP & PROFESSIONAL THEME ---
 st.set_page_config(page_title="Personal Finance", layout="wide")
 
