@@ -240,8 +240,6 @@ if not st.session_state["logged_in"]:
     st.stop()
 
 # --- 3. DATABASE FILES & PATH SETTINGS ---
-# အရေးကြီး: ဖိုင်အားလုံးကို Code (Smart.py) ရှိတဲ့ Folder ထဲမှာပဲ ထားပါ
-# Desktop ပေါ်က ဖိုင်ဟောင်းတွေကို ဒီ Folder ထဲကို ရွှေ့ပေးထားဖို့ မမေ့ပါနဲ့နော်
 FILES = {
     'db': "database.csv", 
     'budget': "budget.csv", 
@@ -262,6 +260,10 @@ def load_data(f, cols):
         pd.DataFrame(columns=cols).to_csv(f, index=False)
     
     df = pd.read_csv(f)
+    
+    # [အရေးကြီး] Receipt Column ကို String အဖြစ် အမြဲသတ်မှတ်ပေးပြီး NaN များကို '' သို့ပြောင်းခြင်း
+    if 'Receipt' in df.columns:
+        df['Receipt'] = df['Receipt'].fillna('').astype(str).replace('nan', '')
     
     # [အရေးကြီး] database.csv မှာ Remark ကော်လံ မရှိရင် အလိုအလျောက် ထည့်ပေးခြင်း
     if f == FILES['db'] and 'Remark' not in df.columns:
