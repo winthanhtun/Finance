@@ -239,15 +239,25 @@ if not st.session_state["logged_in"]:
     # Login မဝင်ရသေးရင် page ရဲ့ ကျန်တဲ့အပိုင်းတွေကို မပြအောင် ဒီနေရာမှာ stop ပါ
     st.stop()
 
-# --- 3. DATABASE FILES ---
+# --- 3. DATABASE FILES & PATH SETTINGS ---
+# အရေးကြီး: ဖိုင်အားလုံးကို Code (Smart.py) ရှိတဲ့ Folder ထဲမှာပဲ ထားပါ
+# Desktop ပေါ်က ဖိုင်ဟောင်းတွေကို ဒီ Folder ထဲကို ရွှေ့ပေးထားဖို့ မမေ့ပါနဲ့နော်
 FILES = {
-    'db': "database.csv", 'budget': "budget.csv", 'savings': "savings.csv",
-    'debt': "debt.csv", 'rec': "recurring.csv", 'debt_cats': 'debt_categories.csv'
+    'db': "database.csv", 
+    'budget': "budget.csv", 
+    'savings': "savings.csv",
+    'debt': "debt.csv", 
+    'rec': "recurring.csv", 
+    'debt_cats': 'debt_categories.csv'
 }
-if not os.path.exists("receipts"): os.makedirs("receipts")
+
+# App ရှိတဲ့ Folder ထဲမှာ receipts folder ရှိမရှိ စစ်မယ်၊ မရှိရင် ဆောက်မယ်
+if not os.path.exists("receipts"): 
+    os.makedirs("receipts")
 
 @st.cache_data(ttl=1)
 def load_data(f, cols):
+    # ဖိုင်မရှိရင် အသစ်ဆောက်မယ့်နေရာ (Code ရှိတဲ့ Folder ထဲမှာပဲ ဆောက်ပေးမယ်)
     if not os.path.exists(f): 
         pd.DataFrame(columns=cols).to_csv(f, index=False)
     
@@ -257,6 +267,7 @@ def load_data(f, cols):
     if f == FILES['db'] and 'Remark' not in df.columns:
         df['Remark'] = ""
         df.to_csv(f, index=False)
+        
     return df
 
 # Data Load လုပ်ခြင်း (အကုန်ပါသွားပါပြီ)
