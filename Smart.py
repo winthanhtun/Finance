@@ -428,14 +428,19 @@ if not data.empty:
     cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Remark", "Receipt"]
     final_table = pd.concat([df_v[cols_to_display], total_row])
 
-    # ဇယားကို Display လုပ်ခြင်း (Remark ပါ ရိုက်လို့ရအောင် column_config ထည့်ထားပါတယ်)
-    edited = st.data_editor(
+    # ဇယားကို Display လုပ်ခြင်း (Receipt ပါ Clickable ဖြစ်အောင် ပြင်လိုက်ပါတယ်)
+    edited = st.data_editor( 
         final_table, 
         use_container_width=True, 
         num_rows="dynamic", 
         hide_index=True,
         column_config={
             "Remark": st.column_config.TextColumn("Remark"),
+            "Receipt": st.column_config.LinkColumn(
+                "Receipt View",
+                help="ဒီနေရာကိုနှိပ်ပြီး ဖိုင်ကိုဖွင့်ပါ",
+                display_text="ဖိုင်ကိုဖွင့်မည်",
+            )
         }
     )
 
