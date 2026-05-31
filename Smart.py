@@ -443,27 +443,7 @@ if not data.empty:
 
     # ဇယားအောက်မှာ Download ခလုတ်လေးတွေ စီပေးမယ်
     st.markdown("---")
-    st.subheader("📥 ပြေစာများ ဒေါင်းလုဒ်လုပ်ရန်")
     
-    # ဇယားထဲက ဖိုင်နာမည်ကို ကိုကိုရွေးလိုက်ရင် အဲ့ဒီဖိုင်ကို Download ပေးမယ်
-    if os.path.exists("receipts"):
-        files = os.listdir("receipts")
-        if files:
-            # Grid အနေနဲ့ ခလုတ်လေးတွေ ခွဲပြမယ်
-            cols = st.columns(4) 
-            for idx, file in enumerate(files):
-                file_path = os.path.join("receipts", file)
-                
-                # ဖိုင်ကို ဖတ်ပြီး Download လုပ်ပေးတဲ့ ခလုတ်
-                with open(file_path, "rb") as f:
-                    cols[idx % 4].download_button(
-                        label=f"📥 {file}",
-                        data=f,
-                        file_name=file,
-                        mime="application/octet-stream"
-                    )
-        else:
-            st.info("လက်ရှိတွင် ဒေါင်းလုဒ်ဆွဲနိုင်သော ပြေစာများ မရှိသေးပါ။")
     if st.button(text['save_changes']):
         # ၁။ Table ထဲက Data အသစ်တွေကို Filter လုပ်ပြီး Database ကို သိမ်းပါ
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
