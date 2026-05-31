@@ -737,7 +737,10 @@ with t6:
     selected_idx = st.selectbox("ပြေစာ ပူးတွဲမည့် စာရင်းကို ရွေးပါ", range(len(options)), format_func=lambda x: options[x])
     
     # ၂။ File Uploader
-    uploaded_file = st.file_uploader("ပြေစာ ပုံတင်ရန်", type=["jpg", "png", "pdf"])
+    uploaded_file = st.file_uploader(
+    "ဖိုင်တင်ရန် (Excel, Word, PDF, Text သို့မဟုတ် ပုံများ)", 
+    type=['png', 'jpg', 'jpeg', 'xlsx', 'xls', 'docx', 'doc', 'pdf', 'txt']
+)
     
     # ၃။ သိမ်းဆည်းခြင်း
     if st.button("ပြေစာ သိမ်းဆည်းမည်"):
