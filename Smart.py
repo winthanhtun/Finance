@@ -750,7 +750,16 @@ with t6:
                 f.write(uploaded_file.getbuffer())
             
             # Database ရဲ့ Receipt Column ထဲကို File Path သွင်းပေးခြင်း
-            data.at[selected_idx, 'Receipt'] = file_path
+            # 'Receipt' column ကို အရင်ဆုံး String type ဖြစ်အောင် လုပ်လိုက်မယ်
+if 'Receipt' not in data.columns:
+    data['Receipt'] = None  # မရှိသေးရင် အသစ်ဆောက်ပေးမယ်
+
+# Type conversion လုပ်ပြီးမှ တန်ဖိုးသတ်မှတ်မယ်
+data['Receipt'] = data['Receipt'].astype(object) 
+data.at[selected_idx, 'Receipt'] = str(file_path)
+
+# ပြီးမှ Save လုပ်မယ်
+data.to_csv(FILES['db'], index=False)
             data.to_csv(FILES['db'], index=False)
             st.success("ပြေစာအား အောင်မြင်စွာ ပူးတွဲပြီးပါပြီ!")
             st.rerun() # ပြောင်းလဲသွားတာကို ချက်ချင်းမြင်ရအောင်
