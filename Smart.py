@@ -428,7 +428,7 @@ if not data.empty:
     cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Remark", "Receipt"]
     final_table = pd.concat([df_v[cols_to_display], total_row])
 
-   # ဇယားကို Display လုပ်ခြင်း
+   # ဇယားကို Display လုပ်ခြင်း (TextColumn အဖြစ်သာ ထားပါ)
     edited = st.data_editor( 
         final_table, 
         use_container_width=True, 
@@ -440,38 +440,56 @@ if not data.empty:
         }
     )
     
+    # ဇယား အပြောင်းအလဲများကို သိမ်းဆည်းရန် ခလုတ်
     if st.button(text['save_changes']):
-        # ၁။ Table ထဲက Data အသစ်တွေကို Filter လုပ်ပြီး Database ကို သိမ်းပါ
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
-        
-        # Amount ပြန်တွက်ခြင်း
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
-        
-        # Type ကို "Income"/"Expense" အဖြစ် သတ်မှတ်ပါ
         clean_df["Type"] = clean_df.apply(lambda x: "Income" if x["Income"] > 0 else "Expense", axis=1)
         
-        # Database ထဲသို့ Remark ပါဝင်အောင် သိမ်းဆည်းခြင်း
         final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"]]
         final_save.to_csv(FILES['db'], index=False)
         
-        # ၂။ Savings ဇယားကို Transaction နဲ့ Sync လုပ်ပါ
+        # Savings ဇယား Sync လုပ်ခြင်း
         if os.path.exists(FILES['savings']):
             s_df = pd.read_csv(FILES['savings'])
             s_df['Saved'] = 0 
-            
             for index, row in s_df.iterrows():
                 goal = row['Goal']
-                total_saved = final_save[
-                    (final_save["Type"] == "Income") & 
-                    (final_save['Category'] == goal)
-                ]['Amount'].sum()
+                total_saved = final_save[(final_save["Type"] == "Income") & (final_save['Category'] == goal)]['Amount'].sum()
                 s_df.at[index, 'Saved'] = total_saved
-                
             s_df.to_csv(FILES['savings'], index=False)
         
         st.success("ဒေတာများနှင့် Remark မှတ်ချက်များကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ!")
-        st.cache_data.clear() # Cache ရှင်းပေးရန်
+        st.cache_data.clear()
         st.rerun()
+
+    # --- လိုအပ်ချက် ၁: Table Column ထဲက Data ကို စီမံခန့်ခွဲခြင်း ---
+    st.markdown("---")
+    st.subheader("🧾 Receipt Column စီမံခန့်ခွဲခြင်း")
+
+    # Receipt column မှာ တန်ဖိုးရှိတဲ့ row တွေကိုပဲ စစ်ယူမယ်
+    valid_rows = final_table[final_table['Receipt'].notna() & (final_table['Receipt'] != "")]
+
+    if not valid_rows.empty:
+        selected_row_idx = st.selectbox("စီမံမည့် Row ကို ရွေးပါ", valid_rows.index, format_func=lambda i: f"Row {i}: {valid_rows.loc[i, 'Receipt']}")
+        
+        current_file = final_table.at[selected_row_idx, 'Receipt']
+        
+        if os.path.exists(current_file):
+            col1, col2 = st.columns(2)
+            with col1:
+                # Receipt Column ထဲက ဖိုင်ကို App နဲ့ ဖွင့်ရန်
+                with open(current_file, "rb") as f:
+                    st.download_button("📥 ဖိုင်ဖွင့်မည် (App ဖြင့်ဖွင့်ရန်)", f, file_name=os.path.basename(current_file))
+            with col2:
+                # Receipt Column ထဲက ဖိုင်ကို ဖျက်ရန်
+                if st.button("❌ ဖိုင်ဖျက်မည်"):
+                    os.remove(current_file)
+                    final_table.at[selected_row_idx, 'Receipt'] = ""
+                    final_table.to_csv(FILES['db'], index=False)
+                    st.rerun()
+    else:
+        st.info("စီမံရန် ပြေစာဖိုင်များ မရှိသေးပါ။")
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
 if not data.empty:
     st.divider()
