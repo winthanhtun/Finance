@@ -745,12 +745,12 @@ with t6:
     with col1:
         if st.button("ပြေစာ သိမ်းဆည်းမည်"):
             if uploaded_file is not None:
-                # receipts folder မရှိရင် အသစ်ဆောက်ပေးခြင်း
                 if not os.path.exists("receipts"):
                     os.makedirs("receipts")
                 
-                # ဖိုင်အမည်သတ်မှတ်ခြင်း (Row နံပါတ်နဲ့ တွဲပြီး သိမ်းမယ်)
-                file_name = f"receipt_{selected_idx}.png" # လိုအပ်ရင် extension ကို ဖိုင်မူရင်းအတိုင်း ပြင်နိုင်ပါတယ်
+                # *** ပြင်ထားတဲ့နေရာ *** ဖိုင်အစစ်ရဲ့ Extension ကို ယူမယ်
+                file_ext = os.path.splitext(uploaded_file.name)[1]
+                file_name = f"receipt_{selected_idx}{file_ext}"
                 file_path = os.path.join("receipts", file_name)
                 
                 with open(file_path, "wb") as f:
@@ -769,7 +769,9 @@ with t6:
     with col2:
         # ၄။ ဖိုင်ဖွင့်ခြင်း/ဖျက်ခြင်း
         current_file = data.at[selected_idx, 'Receipt'] if 'Receipt' in data.columns else None
-        if pd.notna(current_file) and os.path.exists(current_file):
+        
+        # *** ပြင်ထားတဲ့နေရာ *** Type စစ်ဆေးခြင်း
+        if pd.notna(current_file) and isinstance(current_file, str) and os.path.exists(current_file):
             st.info("လက်ရှိဖိုင်ရှိနေပါပြီ")
             with open(current_file, "rb") as f:
                 st.download_button("📥 ဖိုင်ဖွင့်မည် (Download)", f, file_name=os.path.basename(current_file))
@@ -781,11 +783,10 @@ with t6:
                 st.warning("ဖိုင်ဖျက်ပြီးပါပြီ။")
                 st.rerun()
 
-    # ၅။ AI Analysis (ကိုကို့ code မှာ ကျန်ခဲ့တဲ့အပိုင်း)
-    ai_rc_en = "**Analysis:**\n* Document storage repository is armed and ready to index scanned image assets.\n* Digital validation layer is active to back up database entries with physical receipts.\n\n**Recommendations:**\n* Attach high-definition receipt images for all large business-related corporate costs.\n* Use this structured archive to match tax deductor compliance protocols seamlessly each season."
+    # ၅။ AI Analysis
+    ai_rc_en = "**Analysis:**\n* Document storage repository is armed and ready to index scanned image assets.\n* Digital validation layer is active to back up database entries with physical receipts."
     ai_rc_mm = "**သုံးသပ်ချက်:**\n* ပြေစာများနှင့် စာရွက်စာတမ်းများ သိမ်းဆည်းမည့်စနစ်သည် အဆင်သင့်ဖြစ်ပြီး စနစ်တကျ အလုပ်လုပ်နေပါသည်။\n* ဒေတာဘေ့စ်ရှိ စာရင်းများကို ခိုင်မာစေရန် ဒစ်ဂျစ်တယ် ပြေစာပုံရိပ်များဖြင့် ပူးတွဲ သိမ်းဆည်းနိုင်ပြီ ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* လုပ်ငန်းနှင့် သက်ဆိုင်သော ကြီးမားသော ကုန်ကျစရိတ်များအတွက် ပြေစာပုံရိပ်များကို မပျက်မကွက် တင်ထားပါ။\n* နှစ်ချုပ် စာရင်းဇယားများနှင့် အခွန်ဆိုင်ရာ စစ်ဆေးမှုများတွင် အဆင်ပြေစေရန် ဤမှတ်တမ်းကို စနစ်တကျ အသုံးချပါ။"
     render_ai_box(text['analysis_title'], ai_rc_en, ai_rc_mm)
-
 with t7:
     st.subheader(text['calendar_tab'])
     
