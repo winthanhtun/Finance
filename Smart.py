@@ -462,38 +462,6 @@ if not data.empty:
         st.success("ဒေတာများနှင့် Remark မှတ်ချက်များကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ!")
         st.cache_data.clear()
         st.rerun()
-
-    # --- လိုအပ်ချက် ၁: Table Column ထဲက Data ကို စီမံခန့်ခွဲခြင်း ---
-    st.markdown("---")
-    st.subheader("🧾 Receipt Column စီမံခန့်ခွဲခြင်း")
-
-    # Receipt column မှာ တန်ဖိုးရှိတဲ့ row တွေကိုပဲ စစ်ယူမယ်
-    valid_rows = final_table[final_table['Receipt'].notna() & (final_table['Receipt'] != "")]
-
-    if not valid_rows.empty:
-        selected_row_idx = st.selectbox("စီမံမည့် Row ကို ရွေးပါ", valid_rows.index, format_func=lambda i: f"Row {i}: {valid_rows.loc[i, 'Receipt']}")
-        
-        current_file = final_table.at[selected_row_idx, 'Receipt']
-        
-        # *** ဒီနေရာလေးကို ပြင်ပေးထားပါတယ် (Error တက်မှာမဟုတ်တော့ပါဘူး) ***
-        if isinstance(current_file, str) and os.path.exists(current_file):
-            col1, col2 = st.columns(2)
-            with col1:
-                # Receipt Column ထဲက ဖိုင်ကို App နဲ့ ဖွင့်ရန်
-                with open(current_file, "rb") as f:
-                    st.download_button("📥 ဖိုင်ဖွင့်မည် (App ဖြင့်ဖွင့်ရန်)", f, file_name=os.path.basename(current_file))
-            with col2:
-                # Receipt Column ထဲက ဖိုင်ကို ဖျက်ရန်
-                if st.button("❌ ဖိုင်ဖျက်မည်"):
-                    os.remove(current_file)
-                    final_table.at[selected_row_idx, 'Receipt'] = ""
-                    final_table.to_csv(FILES['db'], index=False)
-                    st.rerun()
-        else:
-            # တကယ်လို့ ဖိုင်မရှိရင် သို့မဟုတ် လမ်းကြောင်းမမှန်ရင် ဒီ Message ပေါ်ပါမယ်
-            st.warning("ဤဖိုင်လမ်းကြောင်း မမှန်ကန်ပါ (သို့) ဖိုင်ပျောက်ဆုံးနေပါသည်။")
-    else:
-        st.info("စီမံရန် ပြေစာဖိုင်များ မရှိသေးပါ။")
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
 if not data.empty:
     st.divider()
