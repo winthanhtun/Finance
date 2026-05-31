@@ -475,7 +475,8 @@ if not data.empty:
         
         current_file = final_table.at[selected_row_idx, 'Receipt']
         
-        if os.path.exists(current_file):
+        # *** ဒီနေရာလေးကို ပြင်ပေးထားပါတယ် (Error တက်မှာမဟုတ်တော့ပါဘူး) ***
+        if isinstance(current_file, str) and os.path.exists(current_file):
             col1, col2 = st.columns(2)
             with col1:
                 # Receipt Column ထဲက ဖိုင်ကို App နဲ့ ဖွင့်ရန်
@@ -488,6 +489,9 @@ if not data.empty:
                     final_table.at[selected_row_idx, 'Receipt'] = ""
                     final_table.to_csv(FILES['db'], index=False)
                     st.rerun()
+        else:
+            # တကယ်လို့ ဖိုင်မရှိရင် သို့မဟုတ် လမ်းကြောင်းမမှန်ရင် ဒီ Message ပေါ်ပါမယ်
+            st.warning("ဤဖိုင်လမ်းကြောင်း မမှန်ကန်ပါ (သို့) ဖိုင်ပျောက်ဆုံးနေပါသည်။")
     else:
         st.info("စီမံရန် ပြေစာဖိုင်များ မရှိသေးပါ။")
 # PIE CHARTS & INSIGHTS/RECOMMENDATIONS
