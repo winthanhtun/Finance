@@ -428,7 +428,7 @@ if not data.empty:
     cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Remark", "Receipt"]
     final_table = pd.concat([df_v[cols_to_display], total_row])
 
-   # ဇယားကို Display လုပ်ခြင်း (Download ရအောင် ပြင်ဆင်ထားသည်)
+   # ဇယားကို Display လုပ်ခြင်း
     edited = st.data_editor( 
         final_table, 
         use_container_width=True, 
@@ -436,7 +436,6 @@ if not data.empty:
         hide_index=True,
         column_config={
             "Remark": st.column_config.TextColumn("Remark"),
-            # LinkColumn အစား ပုံမှန် Column အဖြစ်သာ ထားပါတော့မယ်
             "Receipt": st.column_config.TextColumn("ပြေစာဖိုင်")
         }
     )
@@ -734,43 +733,55 @@ with t6:
     st.subheader("🧾 " + text['upload_receipt'])
     
     # ၁။ Transaction Record ကို ရွေးချယ်ခိုင်းခြင်း
-    # "နေ့စွဲ - ခေါင်းစဉ် (ပမာဏ)" ပုံစံနဲ့ ပြပေးမယ်
     options = [f"{i}: {row['Date']} | {row['Category']} ({row['Amount']} K)" for i, row in data.iterrows()]
     selected_idx = st.selectbox("ပြေစာ ပူးတွဲမည့် စာရင်းကို ရွေးပါ", range(len(options)), format_func=lambda x: options[x])
     
-    # ၂။ File Uploader
-    uploaded_file = st.file_uploader(
-    "ဖိုင်တင်ရန် (Excel, Word, PDF, Text သို့မဟုတ် ပုံများ)", 
-    type=['png', 'jpg', 'jpeg', 'xlsx', 'xls', 'docx', 'doc', 'pdf', 'txt']
-)
+    # ၂။ ဖိုင်တင်ခြင်း (Upload)
+    uploaded_file = st.file_uploader("ဖိုင်တင်ရန် (Excel, Word, PDF, Text သို့မဟုတ် ပုံများ)", type=['png', 'jpg', 'jpeg', 'xlsx', 'xls', 'docx', 'doc', 'pdf', 'txt'])
     
-    # ၃။ သိမ်းဆည်းခြင်း
-    if st.button("ပြေစာ သိမ်းဆည်းမည်"):
-        if uploaded_file is not None:
-            # receipts ဖိုင်ထဲမှာ သိမ်းမယ်
-            file_name = f"receipt_{selected_idx}.png"
-            file_path = os.path.join("receipts", file_name)
-            
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            
-            # Database ရဲ့ Receipt Column ထဲကို File Path သွင်းပေးခြင်း
-            if 'Receipt' not in data.columns:
-                data['Receipt'] = None  # မရှိသေးရင် အသစ်ဆောက်ပေးမယ်
+    # ၃။ လုပ်ဆောင်ချက် ခလုတ်များ
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("ပြေစာ သိမ်းဆည်းမည်"):
+            if uploaded_file is not None:
+                # receipts folder မရှိရင် အသစ်ဆောက်ပေးခြင်း
+                if not os.path.exists("receipts"):
+                    os.makedirs("receipts")
+                
+                # ဖိုင်အမည်သတ်မှတ်ခြင်း (Row နံပါတ်နဲ့ တွဲပြီး သိမ်းမယ်)
+                file_name = f"receipt_{selected_idx}.png" # လိုအပ်ရင် extension ကို ဖိုင်မူရင်းအတိုင်း ပြင်နိုင်ပါတယ်
+                file_path = os.path.join("receipts", file_name)
+                
+                with open(file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                
+                if 'Receipt' not in data.columns:
+                    data['Receipt'] = None
+                
+                data.at[selected_idx, 'Receipt'] = str(file_path)
+                data.to_csv(FILES['db'], index=False)
+                st.success("ပြေစာအား အောင်မြင်စွာ ပူးတွဲပြီးပါပြီ!")
+                st.rerun()
+            else:
+                st.warning("ကျေးဇူးပြု၍ ပြေစာဖိုင်ကို ဦးစွာတင်ပေးပါ။")
 
-            # Type conversion လုပ်ပြီးမှ တန်ဖိုးသတ်မှတ်မယ်
-            data['Receipt'] = data['Receipt'].astype(object) 
-            data.at[selected_idx, 'Receipt'] = str(file_path)
-
-            # ပြီးမှ Save လုပ်မယ် (တစ်ခါပဲရေးရမယ်နော်)
-            data.to_csv(FILES['db'], index=False)
+    with col2:
+        # ၄။ ဖိုင်ဖွင့်ခြင်း/ဖျက်ခြင်း
+        current_file = data.at[selected_idx, 'Receipt'] if 'Receipt' in data.columns else None
+        if pd.notna(current_file) and os.path.exists(current_file):
+            st.info("လက်ရှိဖိုင်ရှိနေပါပြီ")
+            with open(current_file, "rb") as f:
+                st.download_button("📥 ဖိုင်ဖွင့်မည် (Download)", f, file_name=os.path.basename(current_file))
             
-            st.success("ပြေစာအား အောင်မြင်စွာ ပူးတွဲပြီးပါပြီ!")
-            st.rerun() # ပြောင်းလဲသွားတာကို ချက်ချင်းမြင်ရအောင်
-        else:
-            st.warning("ကျေးဇူးပြု၍ ပြေစာဖိုင်ကို ဦးစွာတင်ပေးပါ။")
+            if st.button("❌ ဖိုင်ဖျက်မည်"):
+                os.remove(current_file)
+                data.at[selected_idx, 'Receipt'] = ""
+                data.to_csv(FILES['db'], index=False)
+                st.warning("ဖိုင်ဖျက်ပြီးပါပြီ။")
+                st.rerun()
 
-    # ၄။ ကိုကိုကြိုက်တဲ့ AI Analysis (မပြောင်းထားပါဘူး)
+    # ၅။ AI Analysis (ကိုကို့ code မှာ ကျန်ခဲ့တဲ့အပိုင်း)
     ai_rc_en = "**Analysis:**\n* Document storage repository is armed and ready to index scanned image assets.\n* Digital validation layer is active to back up database entries with physical receipts.\n\n**Recommendations:**\n* Attach high-definition receipt images for all large business-related corporate costs.\n* Use this structured archive to match tax deductor compliance protocols seamlessly each season."
     ai_rc_mm = "**သုံးသပ်ချက်:**\n* ပြေစာများနှင့် စာရွက်စာတမ်းများ သိမ်းဆည်းမည့်စနစ်သည် အဆင်သင့်ဖြစ်ပြီး စနစ်တကျ အလုပ်လုပ်နေပါသည်။\n* ဒေတာဘေ့စ်ရှိ စာရင်းများကို ခိုင်မာစေရန် ဒစ်ဂျစ်တယ် ပြေစာပုံရိပ်များဖြင့် ပူးတွဲ သိမ်းဆည်းနိုင်ပြီ ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* လုပ်ငန်းနှင့် သက်ဆိုင်သော ကြီးမားသော ကုန်ကျစရိတ်များအတွက် ပြေစာပုံရိပ်များကို မပျက်မကွက် တင်ထားပါ။\n* နှစ်ချုပ် စာရင်းဇယားများနှင့် အခွန်ဆိုင်ရာ စစ်ဆေးမှုများတွင် အဆင်ပြေစေရန် ဤမှတ်တမ်းကို စနစ်တကျ အသုံးချပါ။"
     render_ai_box(text['analysis_title'], ai_rc_en, ai_rc_mm)
