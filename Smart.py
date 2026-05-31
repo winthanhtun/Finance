@@ -428,7 +428,7 @@ if not data.empty:
     cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Remark", "Receipt"]
     final_table = pd.concat([df_v[cols_to_display], total_row])
 
-    # ဇယားကို Display လုပ်ခြင်း (Receipt ပါ Clickable ဖြစ်အောင် ပြင်လိုက်ပါတယ်)
+   # ဇယားကို Display လုပ်ခြင်း (Download ရအောင် ပြင်ဆင်ထားသည်)
     edited = st.data_editor( 
         final_table, 
         use_container_width=True, 
@@ -436,14 +436,31 @@ if not data.empty:
         hide_index=True,
         column_config={
             "Remark": st.column_config.TextColumn("Remark"),
-            "Receipt": st.column_config.LinkColumn(
-                "Receipt View",
-                help="ဒီနေရာကိုနှိပ်ပြီး ဖိုင်ကိုဖွင့်ပါ",
-                display_text="ဖိုင်ကိုဖွင့်မည်",
+            "Receipt": st.column_config.Column(
+                "ပြေစာဖိုင်",
+                help="ဖိုင်ကို Download ရယူရန် နှိပ်ပါ",
             )
         }
     )
 
+    # ဇယားအောက်မှာ Download ခလုတ်လေးတွေ ပေါ်လာအောင် လုပ်ပေးမယ်
+    st.markdown("---")
+    st.subheader("📥 ပြေစာများ ဒေါင်းလုဒ်လုပ်ရန်")
+    if os.path.exists("receipts"):
+        files = os.listdir("receipts")
+        if files:
+            cols = st.columns(3) # ခလုတ်တွေကို ၃ ကော်လံခွဲပြီး ပြပေးမယ်
+            for idx, file in enumerate(files):
+                file_path = os.path.join("receipts", file)
+                with open(file_path, "rb") as f:
+                    cols[idx % 3].download_button(
+                        label=f"📥 {file}",
+                        data=f,
+                        file_name=file,
+                        mime="application/octet-stream"
+                    )
+        else:
+            st.info("လက်ရှိတွင် ဒေါင်းလုဒ်ဆွဲနိုင်သော ပြေစာများ မရှိသေးပါ။")
     if st.button(text['save_changes']):
         # ၁။ Table ထဲက Data အသစ်တွေကို Filter လုပ်ပြီး Database ကို သိမ်းပါ
         clean_df = edited[edited["Date"] != "TOTAL"].copy()
