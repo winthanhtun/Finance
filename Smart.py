@@ -733,57 +733,50 @@ with t5:
 with t6:
     st.subheader("🧾 " + text['upload_receipt'])
     
-    # ၁။ Transaction Record ကို ရွေးချယ်ခိုင်းခြင်း
-    options = [f"{i}: {row['Date']} | {row['Category']} ({row['Amount']} K)" for i, row in data.iterrows()]
-    selected_idx = st.selectbox("ပြေစာ ပူးတွဲမည့် စာရင်းကို ရွေးပါ", range(len(options)), format_func=lambda x: options[x])
-    
-    # ၂။ ဖိုင်တင်ခြင်း (Upload)
-    uploaded_file = st.file_uploader("ဖိုင်တင်ရန် (Excel, Word, PDF, Text သို့မဟုတ် ပုံများ)", type=['png', 'jpg', 'jpeg', 'xlsx', 'xls', 'docx', 'doc', 'pdf', 'txt'])
-    
-    # ၃။ လုပ်ဆောင်ချက် ခလုတ်များ
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if st.button("ပြေစာ သိမ်းဆည်းမည်"):
-            if uploaded_file is not None:
-                if not os.path.exists("receipts"):
-                    os.makedirs("receipts")
-                
-                # *** ပြင်ထားတဲ့နေရာ *** ဖိုင်အစစ်ရဲ့ Extension ကို ယူမယ်
-                file_ext = os.path.splitext(uploaded_file.name)[1]
-                file_name = f"receipt_{selected_idx}{file_ext}"
-                file_path = os.path.join("receipts", file_name)
-                
-                with open(file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                
-                if 'Receipt' not in data.columns:
-                    data['Receipt'] = None
-                
-                data.at[selected_idx, 'Receipt'] = str(file_path)
-                data.to_csv(FILES['db'], index=False)
-                st.success("ပြေစာအား အောင်မြင်စွာ ပူးတွဲပြီးပါပြီ!")
-                st.rerun()
-            else:
-                st.warning("ကျေးဇူးပြု၍ ပြေစာဖိုင်ကို ဦးစွာတင်ပေးပါ။")
-
-    with col2:
-        # ၄။ ဖိုင်ဖွင့်ခြင်း/ဖျက်ခြင်း
-        current_file = data.at[selected_idx, 'Receipt'] if 'Receipt' in data.columns else None
+    # [ပြင်ဆင်ချက်] Index ပြဿနာမရှိအောင် df_receipts ကို copy ယူထားပါ
+    if not data.empty:
+        df_receipts = data.reset_index(drop=True)
+        options = [f"{i}: {row['Date']} | {row['Category']} ({row['Amount']} K)" for i, row in df_receipts.iterrows()]
+        selected_idx = st.selectbox("ပြေစာ ပူးတွဲမည့် စာရင်းကို ရွေးပါ", range(len(options)), format_func=lambda x: options[x])
         
-        # *** ပြင်ထားတဲ့နေရာ *** Type စစ်ဆေးခြင်း
-        if pd.notna(current_file) and isinstance(current_file, str) and os.path.exists(current_file):
-            st.info("လက်ရှိဖိုင်ရှိနေပါပြီ")
-            with open(current_file, "rb") as f:
-                st.download_button("📥 ဖိုင်ဖွင့်မည် (Download)", f, file_name=os.path.basename(current_file))
-            
-            if st.button("❌ ဖိုင်ဖျက်မည်"):
-                os.remove(current_file)
-                data.at[selected_idx, 'Receipt'] = ""
-                data.to_csv(FILES['db'], index=False)
-                st.warning("ဖိုင်ဖျက်ပြီးပါပြီ။")
-                st.rerun()
+        uploaded_file = st.file_uploader("ဖိုင်တင်ရန်", type=['png', 'jpg', 'jpeg', 'pdf', 'txt'], key="receipt_up")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("ပြေစာ သိမ်းဆည်းမည်"):
+                if uploaded_file is not None:
+                    if not os.path.exists("receipts"): os.makedirs("receipts")
+                    file_ext = os.path.splitext(uploaded_file.name)[1]
+                    file_name = f"receipt_{selected_idx}{file_ext}"
+                    file_path = os.path.join("receipts", file_name)
+                    
+                    with open(file_path, "wb") as f: f.write(uploaded_file.getbuffer())
+                    
+                    # [ပြင်ဆင်ချက်] တိုက်ရိုက် indexing သုံးမည့်အစား loc ကိုသုံးပါ
+                    data.loc[selected_idx, 'Receipt'] = str(file_path)
+                    data.to_csv(FILES['db'], index=False)
+                    st.success("အောင်မြင်စွာ ပူးတွဲပြီးပါပြီ!")
+                    st.rerun()
+                else:
+                    st.warning("ဖိုင်အရင်တင်ပေးပါ")
 
+        with col2:
+            # [ပြင်ဆင်ချက်] KeyError မတက်အောင် .get ကိုသုံးပါ
+            current_file = data.loc[selected_idx, 'Receipt'] if selected_idx in data.index else None
+            
+            if pd.notna(current_file) and isinstance(current_file, str) and os.path.exists(current_file):
+                st.info("လက်ရှိဖိုင်ရှိနေပါပြီ")
+                with open(current_file, "rb") as f:
+                    st.download_button("📥 ဖိုင်ဖွင့်မည်", f, file_name=os.path.basename(current_file))
+                
+                if st.button("❌ ဖိုင်ဖျက်မည်"):
+                    if os.path.exists(current_file): os.remove(current_file)
+                    data.loc[selected_idx, 'Receipt'] = ""
+                    data.to_csv(FILES['db'], index=False)
+                    st.rerun()
+    else:
+        st.warning("ပြသရန် Transaction Data မရှိသေးပါ။")
     # ၅။ AI Analysis
     ai_rc_en = "**Analysis:**\n* Document storage repository is armed and ready to index scanned image assets.\n* Digital validation layer is active to back up database entries with physical receipts."
     ai_rc_mm = "**သုံးသပ်ချက်:**\n* ပြေစာများနှင့် စာရွက်စာတမ်းများ သိမ်းဆည်းမည့်စနစ်သည် အဆင်သင့်ဖြစ်ပြီး စနစ်တကျ အလုပ်လုပ်နေပါသည်။\n* ဒေတာဘေ့စ်ရှိ စာရင်းများကို ခိုင်မာစေရန် ဒစ်ဂျစ်တယ် ပြေစာပုံရိပ်များဖြင့် ပူးတွဲ သိမ်းဆည်းနိုင်ပြီ ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* လုပ်ငန်းနှင့် သက်ဆိုင်သော ကြီးမားသော ကုန်ကျစရိတ်များအတွက် ပြေစာပုံရိပ်များကို မပျက်မကွက် တင်ထားပါ။\n* နှစ်ချုပ် စာရင်းဇယားများနှင့် အခွန်ဆိုင်ရာ စစ်ဆေးမှုများတွင် အဆင်ပြေစေရန် ဤမှတ်တမ်းကို စနစ်တကျ အသုံးချပါ။"
