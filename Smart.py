@@ -251,23 +251,31 @@ FILES = {
 if not os.path.exists("receipts"): 
     os.makedirs("receipts")
 
+# --- [Problem 1 Fix] GitHub အလိုအလျောက် သိမ်းဆည်းရန် Function ---
+def git_push_backup(file_path):
+    try:
+        import subprocess
+        subprocess.run(["git", "config", "--global", "user.email", "smart_housekeeper@example.com"], capture_output=True)
+        subprocess.run(["git", "config", "--global", "user.name", "Smart Housekeeper Bot"], capture_output=True)
+        subprocess.run(["git", "add", file_path], capture_output=True)
+        subprocess.run(["git", "commit", "-m", f"Auto-update backup: {file_path}"], capture_output=True)
+        subprocess.run(["git", "push"], capture_output=True)
+        return True
+    except Exception as e:
+        return False
+
 @st.cache_data(ttl=1)
 def load_data(f, cols):
-    # ဖိုင်မရှိရင် အသစ်ဆောက်မယ့်နေရာ (Code ရှိတဲ့ Folder ထဲမှာပဲ ဆောက်ပေးမယ်)
     if not os.path.exists(f): 
         pd.DataFrame(columns=cols).to_csv(f, index=False)
-    
+        git_push_backup(f) # <-- GitHub သို့ပါ အလိုအလျောက် သိမ်းဆည်းမည်
     df = pd.read_csv(f)
-    
-    # [အရေးကြီး] Receipt Column ကို String အဖြစ် အမြဲသတ်မှတ်ပေးပြီး NaN များကို '' သို့ပြောင်းခြင်း
     if 'Receipt' in df.columns:
         df['Receipt'] = df['Receipt'].fillna('').astype(str).replace('nan', '')
-    
-    # [အရေးကြီး] database.csv မှာ Remark ကော်လံ မရှိရင် အလိုအလျောက် ထည့်ပေးခြင်း
     if f == FILES['db'] and 'Remark' not in df.columns:
         df['Remark'] = ""
         df.to_csv(f, index=False)
-        
+        git_push_backup(f) # <-- GitHub သို့ပါ အလိုအလျောက် သိမ်းဆည်းမည်
     return df
 
 # Data Load လုပ်ခြင်း (အကုန်ပါသွားပါပြီ)
@@ -365,11 +373,13 @@ if st.sidebar.button(text['add_rec_btn']):
         # Data ထည့်ခြင်း
         data = pd.concat([data, new_row], ignore_index=True)
         data.to_csv(FILES['db'], index=False)
-            
+        git_push_backup(FILES['db']) # <-- Problem 1 Fix
+    
         # Savings ထဲသို့ တိုက်ရိုက်ဝင်ခြင်း
         if c_in in s_df['Goal'].values:
             s_df.loc[s_df['Goal'] == c_in, 'Saved'] += a_in
             s_df.to_csv(FILES['savings'], index=False)
+            git_push_backup(FILES['savings']) # <-- Problem 1 Fix
             
         st.cache_data.clear()
         st.success("အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ!")
@@ -459,6 +469,7 @@ if not data.empty:
         
         final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"]]
         final_save.to_csv(FILES['db'], index=False)
+        git_push_backup(FILES['db']) # <-- Problem 1 Fix
         
         # Savings ဇယား Sync လုပ်ခြင်း
         if os.path.exists(FILES['savings']):
@@ -469,6 +480,7 @@ if not data.empty:
                 total_saved = final_save[(final_save["Type"] == "Income") & (final_save['Category'] == goal)]['Amount'].sum()
                 s_df.at[index, 'Saved'] = total_saved
             s_df.to_csv(FILES['savings'], index=False)
+            git_push_backup(FILES['savings']) # <-- Problem 1 Fix
         
         st.success("ဒေတာများနှင့် Remark မှတ်ချက်များကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ!")
         st.cache_data.clear()
@@ -527,6 +539,7 @@ with t1:
             # ဘတ်ဂျက်အသစ် ထည့်သွင်းခြင်း
             new_budget = pd.DataFrame([[bc, bl]], columns=b_df.columns)
             pd.concat([b_df, new_budget], ignore_index=True).to_csv(FILES['budget'], index=False)
+            git_push_backup(FILES['budget']) # <-- Problem 1 Fix
             st.success("ဘတ်ဂျက်အသစ် ထည့်သွင်းပြီးပါပြီ!")
             st.rerun() # အဆင့် (၃) - Page ကို Refresh လုပ်ပေးခြင်း
 
@@ -535,6 +548,7 @@ with t1:
     
     if st.button(text['save_changes'], key="btn_save_b"):
         edited_b.to_csv(FILES['budget'], index=False)
+        git_push_backup(FILES['budget']) # <-- Problem 1 Fix
         st.success(text['db_updated'])
         st.rerun() # အဆင့် (၃) - ပြင်ဆင်ပြီးတာနဲ့ Page ကို Refresh လုပ်ပေးခြင်း
 
@@ -551,17 +565,19 @@ with t1:
 with t2:
     st.subheader(text['tab_titles'][1]) 
     
-    # 1. Goal အသစ်ထည့်ရန် Form (အရင်အတိုင်း)
+   # 1. Goal အသစ်ထည့်ရန် Form
     with st.form("tab_s"):
         sg, stg, sc = st.text_input(text['goal']), st.number_input(text['target']), st.number_input(text['current'])
         if st.form_submit_button(text['save_goal']):
             pd.concat([s_df, pd.DataFrame([[sg, stg, sc]], columns=s_df.columns)], ignore_index=True).to_csv(FILES['savings'], index=False)
+            git_push_backup(FILES['savings']) # <-- Problem 1 Fix
             st.rerun()
             
     # 2. Savings ဇယားကို Editor နဲ့ ပြမယ်
     edited_s = st.data_editor(s_df, use_container_width=True, num_rows="dynamic", key="editor_s")
     if st.button(text['save_changes'], key="btn_save_s"):
         edited_s.to_csv(FILES['savings'], index=False)
+        git_push_backup(FILES['savings']) # <-- Problem 1 Fix
         st.success(text['db_updated'])
         st.rerun()
 
