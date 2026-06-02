@@ -142,7 +142,7 @@ with lang_col:
 with title_col:
     st.markdown(f"""
         <div style='display: grid; place-items: center; text-align: center; height: 100%; min-height: 25px;'>
-            <h1 style='margin: 0; padding: 0; color:#FFFFFF; text-align: right; font-size: 50px;'>
+            <h1 style='margin: 0; padding: 0; color:#FFFFFF; text-align: center; font-size: 45px;'>
                 {text['main_title']}
             </h1>
         </div>
