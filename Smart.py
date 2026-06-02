@@ -586,7 +586,6 @@ with t1:
     render_ai_box(text['analysis_title'], ai_b_en, ai_b_mm)
 
 with t2:
-     
    # 1. Goal အသစ်ထည့်ရန် Form
     with st.form("tab_s"):
         sg, stg, sc = st.text_input(text['goal']), st.number_input(text['target']), st.number_input(text['current'])
@@ -638,8 +637,6 @@ with t2:
     render_ai_box(text['analysis_title'], ai_s_en, ai_s_mm)
 
 with t3:
-    # ခေါင်းစဉ် (Language 2 မျိုးလုံးအတွက်)
-    
     # ၁။ Category အသစ်ဖန်တီးရန် (Amount ပါ ထည့်တွက်မည်)
     with st.form("new_debt_cat_form"):
         new_cat = st.text_input("အကြွေးအမည် (Debt Name)")
