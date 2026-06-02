@@ -42,7 +42,7 @@ LANG_DICT = {
         "exp_opt": "Expense",
         "cat_input": "Category (e.g. Salary, Food)",
         "amount": "Amount",
-        "method": "Payment Method",
+        "method": "Payment",
         "add_rec_btn": "Add Record",
         "budget_prog": "📊 Budget Progress 📊",
         "main_title": "📊 Personal Financial Dashboard 📊",
@@ -66,7 +66,7 @@ LANG_DICT = {
         "to_receive": "To Receive",
         "to_pay": "To Pay",
         "add_debt": "Add Debt",
-        "methods_used": "Payment Method",
+        "methods_used": "Payment",
         "upload_receipt": "Upload Receipt Image",
         "add_rec_btn_tab": "Add Recurring",
         "export_csv": "📥 Export CSV",
@@ -101,10 +101,10 @@ LANG_DICT = {
         "net_bal": "လက်ကျန်ငွေ",
         "inc_chart": "💵 ဝင်ငွေ အသေးစိတ် ခွဲခြမ်းစိတ်ဖြာမှု",
         "exp_chart": "💰 ထွက်ငွေ အသေးစိတ် ခွဲခြမ်းစိတ်ဖြာမှု",
-        "tx_records": "📑 Ngweပေးချေ/လက်ခံ မှုမှတ်တမ်းများ",
+        "tx_records": "📑 ငွေပေးချေ/လက်ခံ မှုမှတ်တမ်းများ",
         "save_changes": " ပြင်ဆင်ချက် သိမ်းဆည်းမည်",
         "db_updated": " အချက်အလက်များအောင်မြင်စွာ ပြုပြင်သိမ်းဆည်း ပြီးပါပြီ!",
-        "tab_titles": ["💰 ဘတ်ဂျက်", "🎯 စုငွေ", "💸 အကြွေး", "📊 နှိုင်းယှဉ်ချက်", "💳 Ngweပေးချေမှု", "🧾 ပြေစာ", "📅 Ngweကြေးပြက္ခဒိန်", "🧮 စုငွေတွက်ချက်စက်", "📁 သိမ်းဆည်းရန်"],
+        "tab_titles": ["💰 ဘတ်ဂျက်", "🎯 စုငွေ", "💸 အကြွေး", "📊 နှိုင်းယှဉ်ချက်", "💳 ငွေပေးချေမှု", "🧾 ပြေစာ", "📅 ငွေကြေးပြက္ခဒိန်", "🧮 စုငွေတွက်ချက်စက်", "📁 သိမ်းဆည်းရန်"],
         "cat_name": "ဘတ်ဂျက် အမည်",
         "limit_amt": "အသုံးပြုမည့် ငွေပမာဏ",
         "set_budget": "ငွေပမာဏ သတ်မှတ်မည်",
@@ -116,14 +116,14 @@ LANG_DICT = {
         "to_receive": "ရရန်",
         "to_pay": "ပေးရန်",
         "add_debt": "အကြွေးစာရင်း ထည့်မည်",
-        "methods_used": "အသုံးပြုခဲ့သော Ngweပေးချေမှုစနစ်များ",
+        "methods_used": "အသုံးပြုခဲ့သော ငွေပေးချေမှုစနစ်များ",
         "upload_receipt": "ပြေစာမှတ်တမ်းများ တင်ရန်",
         "add_rec_btn_tab": "ပုံမှန်စာရင်း ထည့်မည်",
         "export_csv": "📥 CSV ဖိုင်အဖြစ် ထုတ်ယူမည်",
         "analysis_title": "💡 သုံးသပ်ချက်နှင့် အကြံပြုချက်များ",
-        "calendar_tab": "📅 Ngweကြေးပြက္ခဒိန်",
+        "calendar_tab": "📅 ငွေကြေးပြက္ခဒိန်",
         "calc_tab": "🧮 စုငွေတွက်ချက်စက်",
-        "cal_title": "လစဉ် Ngweကြေးပြက္ခဒိန်",
+        "cal_title": "လစဉ် ငွေကြေးပြက္ခဒိန်",
         "calc_title": "စုငွေ ပန်းတိုင်တွက်ချက်မှု",
         "target_amount": "ပန်းတိုင် ပမာဏ",
         "daily_save": "နေ့စဉ် စုရန်ပမာဏ",
@@ -302,11 +302,11 @@ def load_data(f, cols):
     return df
 
 # Data Load လုပ်ခြင်း (အကုန်ပါသွားပါပြီ)
-data = load_data(FILES['db'], ["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"])
+data = load_data(FILES['db'], ["Date", "Type", "Category", "Amount", "Payment", "Receipt", "Remark"])
 b_df = load_data(FILES['budget'], ["Category", "Limit"])
 s_df = load_data(FILES['savings'], ["Goal", "Target", "Saved"])
 d_df = load_data(FILES['debt'], ["Name", "Type", "Amount"])
-rec_df = load_data(FILES['rec'], ["Type", "Category", "Amount", "Payment Method"])
+rec_df = load_data(FILES['rec'], ["Type", "Category", "Amount", "Payment"])
 
 
 # --- Helper Function for AI Render ---
@@ -388,7 +388,7 @@ if st.sidebar.button(text['add_rec_btn']):
             'Type': [type_to_save], 
             'Category': [c_in], 
             'Amount': [a_in], 
-            'Payment Method': [p_in], 
+            'Payment': [p_in], 
             'Receipt': [""],
             'Remark': [r_in] # Remark ကိုပါ ထည့်ပေးလိုက်ပြီ
         })
@@ -465,11 +465,11 @@ if not data.empty:
     total_row = pd.DataFrame([{
         "Date": "TOTAL", "Type": "", "Category": "", 
         "Income": df_v["Income"].sum(), "Expense": df_v["Expense"].sum(), 
-        "Payment Method": "", "Remark": "", "Receipt": ""
+        "Payment": "", "Remark": "", "Receipt": ""
     }])
     
     # ဇယားတွင်ပြမည့် ကော်လံများ
-    cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment Method", "Remark", "Receipt"]
+    cols_to_display = ["Date", "Type", "Category", "Income", "Expense", "Payment", "Remark", "Receipt"]
     final_table = pd.concat([df_v[cols_to_display], total_row])
 
    # ဇယားကို Display လုပ်ခြင်း (TextColumn အဖြစ်သာ ထားပါ)
@@ -490,7 +490,7 @@ if not data.empty:
         clean_df["Amount"] = clean_df["Income"] + clean_df["Expense"]
         clean_df["Type"] = clean_df.apply(lambda x: "Income" if x["Income"] > 0 else "Expense", axis=1)
         
-        final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment Method", "Receipt", "Remark"]]
+        final_save = clean_df[["Date", "Type", "Category", "Amount", "Payment", "Receipt", "Remark"]]
         final_save.to_csv(FILES['db'], index=False)
         git_push_backup(FILES['db']) # <-- Problem 1 Fix
         
@@ -523,7 +523,7 @@ if not data.empty:
             top_inc = inc_data.groupby("Category")["Amount"].sum().idxmax()
             if ti < 500000:
                 ai_inc_en = f"**Analysis:**\n* Total monthly inflow is currently low ({ti:,.0f} K).\n* High concentration dependency detected on a single category: '{top_inc}'.\n\n**Recommendations:**\n* Actively seek secondary revenue channels or freelance tasks to distribute risk.\n* Build a basic micro-business model to increase operational capital."
-                ai_inc_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း လစဉ်ဝင်ငွေပမာဏသည် နည်းပါးနေပါသေးသည် ({ti:,.0f} K)။\n* ဝင်ငွေစီးဆင်းမှုသည် '{top_inc}' အပေါ်တွင်သာ အဓိက မှီခိုနေရကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* Ngweကြေးဆိုင်ရာ စိုးရိမ်ရမှုကို လျှော့ချရန် ဆိုက်ဒ်လိုင်းအလုပ်များနှင့် အခြားဝင်ငွေလမ်းကြောင်းသစ်များကို ရှာဖွေပါ။\n* လည်ပတ်ငွေ ပိုမိုတိုးပွားလာစေရန် အခြေခံ စီးပွားရေးမော်ဒယ်အသေးစားများ ဖော်ထုတ်လုပ်ကိုင်သင့်ပါသည်။"
+                ai_inc_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိ စုစုပေါင်း လစဉ်ဝင်ငွေပမာဏသည် နည်းပါးနေပါသေးသည် ({ti:,.0f} K)။\n* ဝင်ငွေစီးဆင်းမှုသည် '{top_inc}' အပေါ်တွင်သာ အဓိက မှီခိုနေရကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ငွေကြေးဆိုင်ရာ စိုးရိမ်ရမှုကို လျှော့ချရန် ဆိုက်ဒ်လိုင်းအလုပ်များနှင့် အခြားဝင်ငွေလမ်းကြောင်းသစ်များကို ရှာဖွေပါ။\n* လည်ပတ်ငွေ ပိုမိုတိုးပွားလာစေရန် အခြေခံ စီးပွားရေးမော်ဒယ်အသေးစားများ ဖော်ထုတ်လုပ်ကိုင်သင့်ပါသည်။"
             else:
                 ai_inc_en = f"**Analysis:**\n* Core income generation is operating with great stability.\n* The primary engine driving this capital growth vector is '{top_inc}'.\n\n**Recommendations:**\n* Reallocate a fixed percentage of this cash flow into mid-term investment structures.\n* Scale automated configurations to seamlessly cultivate passive interest layers."
                 ai_inc_mm = f"**သုံးသပ်ချက်:**\n* အဓိက ဝင်ငွေစီးဆင်းမှု စနစ်သည် အလွန်တည်ငြိမ် ကောင်းမွန်သော အခြေအနေတွင် ရှိနေပါသည်။\n* ဝင်ငွေတိုးပွားမှုကို မောင်းနှင်ပေးနေသည့် ပင်မရင်းမြစ်မှာ '{top_inc}' ဖြစ်ကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ရရှိလာသော ပိုလျှံငွေများထဲမှ သတ်မှတ်ရာခိုင်နှုန်းတစ်ခုကို ကာလလတ် ရင်းနှီးမြှုပ်နှံမှုများထဲသို့ ပြောင်းရွှေ့ခွဲဝေပါ။\n* ပက်ဆိဗ်ဝင်ငွေ (Passive Income) ရရှိစေမည့် အလိုအလျောက် စနစ်များကို စတင်တည်ဆောက်ပါ။"
@@ -542,7 +542,7 @@ if not data.empty:
             pct = (top_exp_amt / te) * 100 if te > 0 else 0
             if pct > 40:
                 ai_exp_en = f"**Analysis:**\n* Critical spending outflow detected! **'{top_exp}'** consumes a massive {pct:.1f}% of total usage.\n* Structural capital is leaving the loop via a single dominant channel.\n\n**Recommendations:**\n* Immediately enforce strict sub-budget ceilings on **'{top_exp}'** to contain leaks.\n* Postpone non-essential operations inside this specific field for the next 30 days."
-                ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ယိုစိမ့်မှု ကြီးမားစွာ တွေ့ရပြီး **'{top_exp}'** သည် စုစုပေါင်းထွက်ငွေ၏ {pct:.1f}% အထိ ရှိနေပါသည်။\n* Ngweကြေးအမြောက်အမြားသည် ကဏ္ဍတစ်ခုတည်းမှ တဆင့် အဓိက ထွက်ခွာနေကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ယိုစိမ့်မှုများကို ထိန်းချုပ်ရန် **'{top_exp}'** ကဏ္ဍတွင် တင်းကျပ်သော ဘတ်ဂျက်ကန့်သတ်ချက်ကို ချက်ချင်း သတ်မှတ်ပါ။\n* လာမည့် ရက် ၃၀ အတွင်း အဆိုပါကဏ္ဍရှိ မဖြစ်မနေ မဟုတ်သော အသုံးစရိတ်များကို အတတ်နိုင်ဆုံး ဆိုင်းငံ့ထားပါ။"
+                ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ယိုစိမ့်မှု ကြီးမားစွာ တွေ့ရပြီး **'{top_exp}'** သည် စုစုပေါင်းထွက်ငွေ၏ {pct:.1f}% အထိ ရှိနေပါသည်။\n* ငွေကြေးအမြောက်အမြားသည် ကဏ္ဍတစ်ခုတည်းမှ တဆင့် အဓိက ထွက်ခွာနေကြောင်း တွေ့ရှိရပါသည်။\n\n**အကြံပြုချက်များ:**\n* ယိုစိမ့်မှုများကို ထိန်းချုပ်ရန် **'{top_exp}'** ကဏ္ဍတွင် တင်းကျပ်သော ဘတ်ဂျက်ကန့်သတ်ချက်ကို ချက်ချင်း သတ်မှတ်ပါ။\n* လာမည့် ရက် ၃၀ အတွင်း အဆိုပါကဏ္ဍရှိ မဖြစ်မနေ မဟုတ်သော အသုံးစရိတ်များကို အတတ်နိုင်ဆုံး ဆိုင်းငံ့ထားပါ။"
             else:
                 ai_exp_en = f"**Analysis:**\n* Outflow patterns are beautifully balanced and evenly distributed across targets.\n* Total operations are protected because no individual sector is capturing excessive weight.\n\n**Recommendations:**\n* Maintain this identical structural allocation format through the next financial tracking phase.\n* Routinely audit minor elements to ensure unexpected cost spikes do not distort this layout."
                 ai_exp_mm = f"**သုံးသပ်ချက်:**\n* အသုံးစရိတ် ထွက်ရှိမှုပုံစံသည် မျှတမှုရှိပြီး သတ်မှတ်ထားသော ကဏ္ဍများအလိုက် ညီတူညီမျှ ရှိနေပါသည်။\n* ကဏ္ဍတစ်ခုတည်းတွင် ကုန်ကျစရိတ် ပုံမနေသည့်အတွက် အထွေထွေ လည်ပတ်မှုကို မထိခိုက်စေဘဲ ဘေးကင်းပါသည်။\n\n**အကြံပြုချက်များ:**\n* လာမည့် ဘဏ္ဍာရေးကာလများတွင်လည်း ယခုကဲ့သို့ စနစ်တကျ ခွဲဝေသုံးစွဲမှု ပုံစံအတိုင်း ဆက်လက် ထိန်းသိမ်းပါ။\n* မမျှော်လင့်ဘဲ ကုန်ကျစရိတ်များ ရုတ်တရက် မြင့်တက်မလာစေရန် အသေးစား စရိတ်စကများကို ပုံမှန် စစ်ဆေးပါ။"
@@ -581,13 +581,12 @@ with t1:
         ai_b_mm = "**သုံးသပ်ချက်:**\n* ကဏ္ဍအလိုက် ဘတ်ဂျက်ကန့်သတ်ချက်များကို လက်ရှိစနစ်ထဲတွင် အောင်မြင်စွာ ထည့်သွင်းထားပြီး ဖြစ်ပါသည်။\n* သတ်မှတ်ထားသော ဘောင်များအတွင်း ကုန်ကျစရိတ်များကို အချိန်နဲ့တပြေးညီ ကောင်းမွန်စွာ စောင့်ကြည့်နိုင်ပြီ ဖြစ်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* ဘတ်ဂျက်စုစုပေါင်း ပမာဏသည် ခန့်မှန်းလစဉ်ဝင်ငွေ၏ ၇၀% ထက် မကျော်လွန်စေရန် ဂရုပြုပါ။\n* လက်တွေ့သုံးစွဲမှု မှတ်တမ်းများအပေါ် အခြေခံ၍ လစဉ် ဘတ်ဂျက်ပမာဏများကို လိုအပ်သလို အနည်းငယ် ညှိနှိုင်းပြင်ဆင်ပါ။"
     else:
         ai_b_en = "**Analysis:**\n* The budget matrix is currently empty with zero protective thresholds found.\n* Financial parameters are currently exposed to sudden impulsive spending vectors.\n\n**Recommendations:**\n* Set definite ceilings for your top three historical operational costs immediately.\n* Review past expenditure layers to find the optimal baseline numbers for each key category."
-        ai_b_mm = "**သုံးသပ်ချက်:**\n* စနစ်ထဲတွင် ဘတ်ဂျက်သတ်မှတ်ချက်များ မရှိသေးဘဲ အကာအကွယ်မဲ့သော အခြေအနေ ဖြစ်နေပါသည်။\n* မမျှော်လင့်ဘဲ စိတ်အလိုလိုက် သုံးစွဲမိမည့် အန္တရာယ်နှင့် Ngweကြေးယိုစိမ့်မှုများ ဖြစ်ပေါ်နိုင်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* အသုံးစရိတ် အများဆုံးဖြစ်လေ့ရှိသည့် အဓိက ကဏ္ဍ ၃ ခုအတွက် ကန့်သတ်ချက်များကို ချက်ချင်း သတ်မှတ်ပါ။\n* သင့်တင့်မျှတသော ဘတ်ဂျက်ပမာဏများ ရရှိစေရန် ယခင်လများက ကုန်ကျစရိတ်များကို ပြန်လည် ဆန်းစစ်ပါ။"
+        ai_b_mm = "**သုံးသပ်ချက်:**\n* စနစ်ထဲတွင် ဘတ်ဂျက်သတ်မှတ်ချက်များ မရှိသေးဘဲ အကာအကွယ်မဲ့သော အခြေအနေ ဖြစ်နေပါသည်။\n* မမျှော်လင့်ဘဲ စိတ်အလိုလိုက် သုံးစွဲမိမည့် အန္တရာယ်နှင့် ငွေကြေးယိုစိမ့်မှုများ ဖြစ်ပေါ်နိုင်ပါသည်။\n\n**အကြံပြုချက်များ:**\n* အသုံးစရိတ် အများဆုံးဖြစ်လေ့ရှိသည့် အဓိက ကဏ္ဍ ၃ ခုအတွက် ကန့်သတ်ချက်များကို ချက်ချင်း သတ်မှတ်ပါ။\n* သင့်တင့်မျှတသော ဘတ်ဂျက်ပမာဏများ ရရှိစေရန် ယခင်လများက ကုန်ကျစရိတ်များကို ပြန်လည် ဆန်းစစ်ပါ။"
     
     render_ai_box(text['analysis_title'], ai_b_en, ai_b_mm)
 
 with t2:
-    st.subheader(text['tab_titles'][1]) 
-    
+     
    # 1. Goal အသစ်ထည့်ရန် Form
     with st.form("tab_s"):
         sg, stg, sc = st.text_input(text['goal']), st.number_input(text['target']), st.number_input(text['current'])
@@ -640,7 +639,6 @@ with t2:
 
 with t3:
     # ခေါင်းစဉ် (Language 2 မျိုးလုံးအတွက်)
-    st.subheader("📊 အကြွေးစာရင်းနှင့် Progress Bar / Debt List & Progress")
     
     # ၁။ Category အသစ်ဖန်တီးရန် (Amount ပါ ထည့်တွက်မည်)
     with st.form("new_debt_cat_form"):
@@ -752,7 +750,7 @@ with t4:
 with t5:
     st.subheader("💳 " + text['methods_used']) # Header လေးတော့ ထည့်ပေးထားတယ်
     if not data.empty:
-        fig_p = px.pie(data, values="Amount", names="Payment Method", 
+        fig_p = px.pie(data, values="Amount", names="Payment", 
                        template="plotly_dark", color_discrete_sequence=custom_colors)
 
         # FLOATING STYLE
@@ -760,7 +758,7 @@ with t5:
         st.plotly_chart(fig_p, use_container_width=True)
 
         # Payment Tab Analysis
-        top_method = data.groupby("Payment Method")["Amount"].sum().idxmax()
+        top_method = data.groupby("Payment")["Amount"].sum().idxmax()
         ai_p_en = f"**Analysis:**\n* Heavy terminal transaction reliance detected centered inside the **'{top_method}'** system.\n* Channel concentration risk is high if this single system experiences tech server issues.\n\n**Recommendations:**\n* Maintain secondary cash or bank backup buffers to prevent sudden transactional lockouts.\n* Audit digital wallets frequently to ensure transfer limit caps do not stall large urgent items."
         ai_p_mm = f"**သုံးသပ်ချက်:**\n* လက်ရှိတွင် ငွေပေးချေမှု အများစုအတွက် **'{top_method}'** စနစ်တစ်ခုတည်းကိုသာ အဓိက အသုံးပြုနေကြောင်း တွေ့ရပါသည်။\n* ၎င်းစနစ်တစ်ခုတည်း နည်းပညာပိုင်းဆိုင်ရာ ချို့ယွင်းချက်ဖြစ်ပေါ်ပါက လုပ်ငန်းလည်ပတ်မှု ကြန့်ကြာနိုင်သည့် စွန့်စားရမှု ရှိပါသည်။\n\n**အကြံပြုချက်များ:**\n* ငွေပေးချေမှုများ လုံးဝရပ်တန့်မသွားစေရန် အခြားဘဏ်စနစ် သို့မဟုတ် လက်ငင်းငွေသား (Cash) အရန် ထားရှိပါ။\n* အရေးကြီး လုပ်ငန်းကိစ္စများတွင် ငွေလွှဲပမာဏ ကန့်သတ်ချက် (Limits) ကြောင့် မကြန့်ကြာစေရန် ဒစ်ဂျစ်တယ်ပိုက်ဆံအိတ်များကို စစ်ဆေးပါ။"
     else:
