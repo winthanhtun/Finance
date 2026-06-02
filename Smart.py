@@ -248,21 +248,43 @@ FILES = {
     'debt_cats': 'debt_categories.csv'
 }
 
-# App ရှိတဲ့ Folder ထဲမှာ receipts folder ရှိမရှိ စစ်မယ်၊ မရှိရင် ဆောက်မယ်
+# App ရှိတဲ့ Folder ထဲမှာ receipts folder ရှိမရှိ စစ်မယ်၊
+# မရှိရင် ဆောက်မယ်
 if not os.path.exists("receipts"): 
     os.makedirs("receipts")
 
-# --- [Problem 1 Fix] GitHub အလိုအလျောက် သိမ်းဆည်းရန် Function ---
+# --- [Problem 1 Fix - Secure GitHub Token Authentication] ---
 def git_push_backup(file_path):
+    """Personal Access Token ကိုသုံး၍ GitHub သို့ စိတ်ချရစွာ Auto Push လုပ်ပေးမည့် စနစ်သစ်"""
     try:
         import subprocess
-        subprocess.run(["git", "config", "--global", "user.email", "smart_housekeeper@example.com"], capture_output=True)
-        subprocess.run(["git", "config", "--global", "user.name", "Smart Housekeeper Bot"], capture_output=True)
+        
+        # Streamlit Secrets ထဲကနေ လုံခြုံရေး Token နှင့် အချက်အလက်များ လှမ်းဖတ်ခြင်း
+        github_token = st.secrets.get("github", {}).get("token", None)
+        github_user = st.secrets.get("github", {}).get("username", None)
+        github_repo = st.secrets.get("github", {}).get("repo_name", None)
+        
+        # အချက်အလက် မပြည့်စုံပါက Error မတက်စေရန် စစ်ဆေးပြီး Local တွင်သာ သိမ်းဆည်းမည်
+        if not github_token or not github_user or not github_repo:
+            return False
+            
+        # Git Config သတ်မှတ်ခြင်း
+        subprocess.run(["git", "config", "user.email", f"{github_user}@users.noreply.github.com"], capture_output=True)
+        subprocess.run(["git", "config", "user.name", github_user], capture_output=True)
+        
+        # Token အသုံးပြု၍ လုံခြုံစိတ်ချရသော Authenticated Remote URL အဖြစ် ပြောင်းလဲသတ်မှတ်ခြင်း
+        remote_url = f"https://{github_token}@github.com/{github_user}/{github_repo}.git"
+        subprocess.run(["git", "remote", "set-url", "origin", remote_url], capture_output=True)
+        
+        # Add, Commit နှင့် GitHub ပေါ်သို့ တိုက်ရိုက် Push လုပ်ခြင်း
         subprocess.run(["git", "add", file_path], capture_output=True)
-        subprocess.run(["git", "commit", "-m", f"Auto-update backup: {file_path}"], capture_output=True)
-        subprocess.run(["git", "push"], capture_output=True)
+        subprocess.run(["git", "commit", "-m", f"Auto-update financial backup: {file_path}"], capture_output=True)
+        
+        # Streamlit Cloud ရဲ့ ပင်မ Branch (main) သို့ တိုက်ရိုက် တွန်းပို့ခြင်း
+        subprocess.run(["git", "push", "origin", "main"], capture_output=True)
         return True
     except Exception as e:
+        # Error တက်သော်လည်း စနစ်တစ်ခုလုံး ရပ်မသွားစေရန် False ဖြင့် ထွက်စေမည်
         return False
 
 @st.cache_data(ttl=1)
